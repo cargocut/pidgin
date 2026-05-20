@@ -1,0 +1,6 @@
+version = 0.28.1
+profile = janestreet
+margin = 80
+parse-docstrings
+break-separators = before
+break-infix = fit-or-vertical
