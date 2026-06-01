@@ -34,3 +34,6 @@ setup.log
 
 # Local OPAM switch
 _opam/
+
+# Jetbrain idea generatedfiles
+.idea

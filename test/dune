@@ -1,0 +1,6 @@
+(library
+ (name pidgin_test)
+ (inline_tests)
+ (libraries pidgin)
+ (preprocess
+  (pps ppx_expect)))
