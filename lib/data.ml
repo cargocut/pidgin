@@ -13,13 +13,19 @@ type t =
   | Record of (string * t) list
 
 module Construct = struct
-  let null = Null
+  type 'a to_data = 'a -> t
+  type 'a to_field = string * 'a -> string * t
+
+  let null _ = Null
   let bool b = Bool b
   let int i = Int i
   let float f = Float f
   let string s = String s
   let list v = List v
+  let list_of f v = list (List.map f v)
   let record fields = Record fields
+  let record_of f v = record (List.map f v)
+  let contramap f conv d = conv (f d)
 end
 
 module Deconstruct = struct
@@ -34,7 +40,7 @@ module Deconstruct = struct
     | Record f -> record f
   ;;
 
-  let fold_opt =
+  let fold_partial =
     fun ?null ?bool ?int ?float ?string ?list ?record ~default t ->
     let or_else f1 f2 = Option.value f1 ~default:(fun _ -> default t) in
     fold

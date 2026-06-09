@@ -1,12 +1,9 @@
-(* Copyright (c) 2026, Cargocut and the Pidgin developers.
-   All rights reserved.
-
-   SPDX-License-Identifier: BSD-3-Clause *)
+open Pidgin
 
 let null_string = "null"
 let list_string l = "[" ^ String.concat "," l ^ "]"
 let record_string r = "{" ^ String.concat "," r ^ "}"
-let attribute_string k s = k ^ ":" ^ s
+let attribute_string k s = "\"" ^ k ^ "\":" ^ s
 
 let rec to_string e =
   let open Data.Deconstruct in
