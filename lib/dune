@@ -1,3 +1,4 @@
 (library
  (name pidgin)
- (public_name pidgin))
+ (public_name pidgin)
+ (libraries nel))

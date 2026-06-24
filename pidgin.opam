@@ -24,8 +24,9 @@ bug-reports: "https://github.com/cargocut/pidgin/issues"
 depends: [
   "dune" {>= "3.21"}
   "ocaml" {>= "5.0.0"}
+  "nel" {>= "1.0.0"}
+  "alcotest" {with-test & >= "1.9.1"}
   "ppx_expect" {with-test & >= "0.17.3"}
-  "mdx" {with-test & >= "2.5.1"}
   "utop" {with-dev-setup}
   "ocamlformat" {with-dev-setup}
   "ocp-indent" {with-dev-setup}
