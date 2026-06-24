@@ -3,24 +3,30 @@
 
    SPDX-License-Identifier: BSD-3-Clause *)
 
+(** {1 Types} *)
+
 type t =
-  | Null
-  | Bool of bool
-  | Int of int
-  | Float of float
-  | String of string
+  | Nothing
+  | Opt of t
+  | Bool
+  | Int
+  | Float
+  | String
   | List of t list
   | Record of (string * t) list
 
 module Construct = struct
-  type 'a to_data = 'a -> t
+  type 'a to_repr = 'a -> t
   type 'a to_field = string * 'a -> string * t
 
-  let null _ = Null
-  let bool b = Bool b
-  let int i = Int i
-  let float f = Float f
-  let string s = String s
+  let nothing t = Nothing
+  let opt t = Opt t
+  let opt_of f t = Opt (f t)
+  let bool _ = Bool
+  let bool _ = Bool
+  let int _ = Int
+  let float _ = Float
+  let string _ = String
   let list v = List v
   let list_of f v = list (List.map f v)
   let record fields = Record fields
@@ -29,22 +35,33 @@ module Construct = struct
 end
 
 module Deconstruct = struct
-  let fold =
-    fun ~null ~bool ~int ~float ~string ~list ~record -> function
-    | Null -> null ()
-    | Bool b -> bool b
-    | Int i -> int i
-    | Float f -> float f
-    | String s -> string s
+  let fold ~nothing ~opt ~bool ~int ~float ~string ~list ~record = function
+    | Nothing -> nothing ()
+    | Opt t -> opt t
+    | Bool -> bool ()
+    | Int -> int ()
+    | Float -> float ()
+    | String -> string ()
     | List l -> list l
     | Record f -> record f
   ;;
 
-  let fold_partial =
-    fun ?null ?bool ?int ?float ?string ?list ?record ~default t ->
+  let fold_partial
+        ?nothing
+        ?opt
+        ?bool
+        ?int
+        ?float
+        ?string
+        ?list
+        ?record
+        ~default
+        t
+    =
     let or_else f1 f2 = Option.value f1 ~default:(fun _ -> default t) in
     fold
-      ~null:(or_else null default)
+      ~nothing:(or_else nothing default)
+      ~opt:(or_else opt default)
       ~bool:(or_else bool default)
       ~int:(or_else int default)
       ~float:(or_else float default)
