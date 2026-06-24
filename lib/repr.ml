@@ -29,7 +29,12 @@ module Construct = struct
 end
 
 module Deconstruct = struct
-  type error = Invalid_kind of Kind.t
+  type error =
+    | Invalid_kind of
+        { expecting : Kind.t
+        ; given : Kind.t
+        }
+
   type 'a from_repr = t -> ('a, error) result
 
   let fold ~null ~bool ~int ~float ~string ~list ~record = function
@@ -56,54 +61,74 @@ module Deconstruct = struct
   ;;
 
   let eta_expand f = fun x -> f x
+  let invalid_kind expecting given = Invalid_kind { expecting; given }
+
+  let rec type_of_repr t =
+    fold
+      ~null:(fun _ -> Kind.Nothing)
+      ~bool:(fun _ -> Kind.Bool)
+      ~int:(fun _ -> Kind.Int)
+      ~float:(fun _ -> Kind.Float)
+      ~string:(fun _ -> Kind.String)
+      ~list:(fun l -> Kind.List (List.map type_of_repr l))
+      ~record:(fun l ->
+        Kind.Record (List.map (fun (n, v) -> n, type_of_repr v) l))
+      t
+  ;;
 
   let null =
     eta_expand
     @@ fold_partial
          ~null:(fun v -> Result.ok v)
          ~default:(fun v ->
-           Result.error @@ Invalid_kind (Kind.Opt Kind.Nothing))
+           Result.error @@ invalid_kind Kind.Nothing (type_of_repr v))
   ;;
 
   let bool =
     eta_expand
     @@ fold_partial
          ~bool:(fun b -> Result.ok b)
-         ~default:(fun v -> Result.error @@ Invalid_kind Kind.Bool)
+         ~default:(fun v ->
+           Result.error @@ invalid_kind Kind.Bool (type_of_repr v))
   ;;
 
   let int =
     eta_expand
     @@ fold_partial
          ~int:(fun v -> Result.ok v)
-         ~default:(fun v -> Result.error @@ Invalid_kind Kind.Int)
+         ~default:(fun v ->
+           Result.error @@ invalid_kind Kind.Int (type_of_repr v))
   ;;
 
   let float =
     eta_expand
     @@ fold_partial
          ~float:(fun v -> Result.ok v)
-         ~default:(fun v -> Result.error @@ Invalid_kind Kind.Float)
+         ~default:(fun v ->
+           Result.error @@ invalid_kind Kind.Float (type_of_repr v))
   ;;
 
   let string =
     eta_expand
     @@ fold_partial
          ~string:(fun v -> Result.ok v)
-         ~default:(fun v -> Result.error @@ Invalid_kind Kind.String)
+         ~default:(fun v ->
+           Result.error @@ invalid_kind Kind.String (type_of_repr v))
   ;;
 
   let list =
     eta_expand
     @@ fold_partial
          ~list:(fun v -> Result.ok v)
-         ~default:(fun v -> Result.error @@ Invalid_kind (Kind.List []))
+         ~default:(fun v ->
+           Result.error @@ invalid_kind (Kind.List []) (type_of_repr v))
   ;;
 
   let record =
     eta_expand
     @@ fold_partial
          ~record:(fun v -> Result.ok v)
-         ~default:(fun v -> Result.error @@ Invalid_kind (Kind.Record []))
+         ~default:(fun v ->
+           Result.error @@ invalid_kind (Kind.Record []) (type_of_repr v))
   ;;
 end

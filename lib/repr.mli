@@ -61,7 +61,12 @@ end
 (** {2 Catamorphisms} *)
 
 module Deconstruct : sig
-  type error = Invalid_kind of Kind.t
+  type error =
+    | Invalid_kind of
+        { expecting : Kind.t
+        ; given : Kind.t
+        }
+
   type 'a from_repr = t -> ('a, error) result
 
   (** [null] returns the {!type:t} for [null].*)
