@@ -2,7 +2,6 @@
 (name pidgin)
 (version dev)
 (generate_opam_files)
-(using mdx 0.4)
 
 (source (github cargocut/pidgin))
 (license BSD-3-Clause)
@@ -26,10 +25,10 @@
  (description "Pidgin is a common language for dealing with serialization an deserialization of complex data structures")
  (depends
  (ocaml (>= 5.0.0))
+ (nel (>= 1.0.0))
 
  ;; test setup
- (ppx_expect (and :with-test (>= 0.17.3)))
- (mdx (and :with-test  (>= 2.5.1)))
+ (alcotest (and :with-test (>= 1.9.1)))
 
  ;; dev setup
  (utop :with-dev-setup)

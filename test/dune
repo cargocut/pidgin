@@ -1,0 +1,4 @@
+(test
+ (name pidgin_test)
+ (flags (:standard) -open Pidgin)
+ (libraries alcotest pidgin test_lib))

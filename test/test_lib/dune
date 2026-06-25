@@ -1,0 +1,5 @@
+(library
+ (name test_lib)
+ (flags (:standard) -open Pidgin)
+ (libraries nel pidgin alcotest)
+ (modules_without_implementation sigs))
