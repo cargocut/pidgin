@@ -117,6 +117,9 @@ val int64 : int64 conv
     then we can get a conversion from [a] to [t] to [b] to [t]. *)
 val using : ('b -> 'a) -> 'a conv -> 'b conv
 
+(** [replace k] is [using (fun _ -> k)]. *)
+val replace : 'b -> 'b conv -> 'a conv
+
 (** {1 Equality} *)
 
 (** Equality between terms. *)
@@ -151,3 +154,14 @@ val fold_partial
   -> (t -> 'a)
   -> t
   -> 'a
+
+(** {1 Infix operators} *)
+
+module Infix : sig
+  (** Some infix helpers. *)
+
+  (** [f <$> conv] is [using f conv]. *)
+  val ( <$> ) : ('b -> 'a) -> 'a conv -> 'b conv
+end
+
+include module type of Infix

@@ -207,7 +207,7 @@ let rec to_string
   (* NOTE: To string is mostly for inspection (and test unit
      purpose). *)
   function
-  | Any -> "?any"
+  | Any -> "any"
   | Null -> "null"
   | Bool -> "bool"
   | Int -> "int"

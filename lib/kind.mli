@@ -17,7 +17,7 @@
 
 (** The type describing a [Kind]. Unlike representations, a user does
     not want to manipulate them explicitly, which is why they remain
-    private. (Not private for inspection) *)
+    private. (Not abstract for inspection) *)
 type t = private
   | Any
   | Or of t list

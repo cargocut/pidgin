@@ -35,6 +35,7 @@ let rec equal a b =
 type 'a conv = 'a -> t
 
 let using f conv x = conv (f x)
+let replace n = using (fun _ -> n)
 let null _ = Null
 let bool b = Bool b
 let int i = Int i
@@ -112,3 +113,9 @@ let fold_partial ?null ?bool ?int ?float ?string ?list ?record default x =
     ~record:(opt_or record)
     x
 ;;
+
+module Infix = struct
+  let ( <$> ) = using
+end
+
+include Infix
