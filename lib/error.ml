@@ -27,6 +27,37 @@ and for_record =
   | Missing_field of string Nel.t
   | Invalid_subrecord of for_value
 
+let rec equal_for_value a b =
+  match a, b with
+  | Unexpected_kind { expected; given; value }, Unexpected_kind b ->
+    Kind.equal expected b.expected
+    && Kind.equal given b.given
+    && Repr.equal value b.value
+  | Invalid_list { errors; value }, Invalid_list b ->
+    Repr.equal value b.value
+    && Nel.equal
+         (fun (i, err) (i2, err2) -> Int.equal i i2 && equal_for_value err err2)
+         errors
+         b.errors
+  | Unexpected_value a, Unexpected_value b -> String.equal a b
+  | Invalid_record { errors; value }, Invalid_record b ->
+    Repr.equal value b.value && Nel.equal equal_for_record errors b.errors
+  | Unexpected_kind _, _
+  | Invalid_list _, _
+  | Invalid_record _, _
+  | Unexpected_value _, _ -> false
+
+and equal_for_record a b =
+  match a, b with
+  | Invalid_subrecord a, Invalid_subrecord b -> equal_for_value a b
+  | Missing_field a, Missing_field b -> Nel.equal String.equal a b
+  | Invalid_field { field; error }, Invalid_field b ->
+    Nel.equal String.equal field b.field && equal_for_value error b.error
+  | Invalid_field _, _ | Missing_field _, _ | Invalid_subrecord _, _ -> false
+;;
+
+let equal = equal_for_value
+
 let unexpected_kind expected value =
   let given = Kind.infer value in
   Unexpected_kind { given; expected; value }

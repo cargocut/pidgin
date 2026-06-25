@@ -29,7 +29,6 @@
 
  ;; test setup
  (alcotest (and :with-test (>= 1.9.1)))
- (ppx_expect (and :with-test (>= 0.17.3)))
 
  ;; dev setup
  (utop :with-dev-setup)

@@ -115,11 +115,18 @@ module Syntax : sig
   (** [bind] binding operator. *)
   val ( let* ) : ('a, 'b) result -> ('a -> ('c, 'b) result) -> ('c, 'b) result
 
-  (** Monoidal product. *)
-  val ( and+ ) : ('a, 'b) result -> ('c, 'b) result -> ('a * 'c, 'b) result
+  (** Monoidal product (errors are a Semigroup, a Nel, so it collapse errors).
+  *)
+  val ( and+ )
+    :  ('a, 'b Nel.t) result
+    -> ('c, 'b Nel.t) result
+    -> ('a * 'c, 'b Nel.t) result
 
   (** Same as [and+]. *)
-  val ( and* ) : ('a, 'b) result -> ('c, 'b) result -> ('a * 'c, 'b) result
+  val ( and* )
+    :  ('a, 'b Nel.t) result
+    -> ('c, 'b Nel.t) result
+    -> ('a * 'c, 'b Nel.t) result
 end
 
 include module type of Syntax

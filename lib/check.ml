@@ -22,6 +22,7 @@ module Syntax = struct
   let ( and+ ) a b =
     match a, b with
     | Ok x, Ok y -> Ok (x, y)
+    | Error a, Error b -> Error (Nel.append a b)
     | Error err, _ | _, Error err -> Error err
   ;;
 
@@ -90,7 +91,8 @@ let list_of v = function
     in
     mapped_result
     |> Result.map List.rev
-    |> Result.map_error (Error.invalid_list value)
+    |> Result.map_error (fun errors ->
+      Error.invalid_list value (Nel.rev errors))
   | x ->
     (* NOTE: we cannot inspect the validator [v] here, so we lose the
        kind information. *)

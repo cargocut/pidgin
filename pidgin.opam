@@ -26,7 +26,6 @@ depends: [
   "ocaml" {>= "5.0.0"}
   "nel" {>= "1.0.0"}
   "alcotest" {with-test & >= "1.9.1"}
-  "ppx_expect" {with-test & >= "0.17.3"}
   "utop" {with-dev-setup}
   "ocamlformat" {with-dev-setup}
   "ocp-indent" {with-dev-setup}

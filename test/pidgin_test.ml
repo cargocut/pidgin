@@ -10,5 +10,8 @@ let () =
     ; Repr_desugaring_test.cases
     ; Kind_test.cases
     ; Kind_inference_test.cases
+    ; Check_simple_test.cases
+    ; Check_list_test.cases
+    ; Check_record_test.cases
     ]
 ;;

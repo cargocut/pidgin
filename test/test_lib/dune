@@ -2,6 +2,4 @@
  (name test_lib)
  (flags (:standard) -open Pidgin)
  (libraries nel pidgin alcotest)
- (inline_tests)
- (preprocess
-  (pps ppx_expect)))
+ (modules_without_implementation sigs))

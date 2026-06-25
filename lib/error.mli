@@ -61,3 +61,14 @@ val invalid_subrecord : for_value -> for_record Nel.t
 
 (** Create a [Invalid_record] error. *)
 val invalid_record : Repr.t -> for_record Nel.t -> for_value
+
+(** {1 Equalities} *)
+
+(** Equality between value errors. *)
+val equal_for_value : for_value -> for_value -> bool
+
+(** Equality between record errors. *)
+val equal_for_record : for_record -> for_record -> bool
+
+(** See {!val:equal_for_value}. *)
+val equal : for_value -> for_value -> bool

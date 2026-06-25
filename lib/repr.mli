@@ -10,7 +10,7 @@
 
 (** {1 Types} *)
 
-(** The abstract representation of the language is relatively
+(** The generic representation of the language is relatively
     straightforward (and compact), closely resembling the
     representation chosen to describe JSON.
 
@@ -26,7 +26,7 @@
     validation functions, it is assumed that the validations will
     handle these unusual cases. *)
 
-(** The abstract representation of language. *)
+(** The generic representation of language. *)
 type t =
   | Null
   | Bool of bool
