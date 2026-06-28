@@ -23,6 +23,9 @@ type 'a t = (Repr.t, 'a) fn
 
 (** {1 Data Validation} *)
 
+(** [check repr kind] verify the [kind] of the given [repr]. *)
+val check : Repr.t -> Kind.t -> unit value
+
 (** Validator from {!type:Repr.t} to [unit]. *)
 val null : unit t
 

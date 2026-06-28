@@ -36,6 +36,64 @@ let unexpected_kind kind expr =
   expr |> Error.unexpected_kind kind |> Result.error
 ;;
 
+let invalid_field ?(alt = []) field error =
+  Error.Invalid_field { field = Nel.(make field alt); error }
+;;
+
+let rec check r k =
+  match r, k with
+  | Repr.Null, Kind.Null -> Ok ()
+  | Repr.Bool _, Kind.Bool -> Ok ()
+  | Repr.Int _, Kind.Int -> Ok ()
+  | Repr.Float _, Kind.Float -> Ok ()
+  | Repr.List lr, Kind.List k ->
+    let _i, mapped_result =
+      List.fold_left
+        (fun (i, acc) value ->
+           let acc =
+             match acc, check value k with
+             | Ok xs, Ok x -> Ok (x :: xs)
+             | Error xs, Error x -> Error (Nel.cons (i, x) xs)
+             | Error e, _ -> Error e
+             | _, Error e -> Error (Nel.singleton (i, e))
+           in
+           i + 1, acc)
+        (0, Ok [])
+        lr
+    in
+    mapped_result
+    |> Result.map (fun _ -> ())
+    |> Result.map_error (fun errors -> Error.invalid_list r (Nel.rev errors))
+  | Repr.Record lr, Kind.Record lk ->
+    let mapped_result =
+      List.fold_left
+        (fun acc (name, value) ->
+           let kind = List.find_opt (fun (n, _) -> n = name) lk in
+           let _, kind = Option.value kind ~default:(name, Kind.null) in
+           (* TODO manage fields in type but not in term *)
+           match acc, check value kind with
+           | Ok xs, Ok x -> Ok (x :: xs)
+           | Error xs, Error x -> Error (Nel.cons (invalid_field name x) xs)
+           | Error e, _ -> Error e
+           | _, Error e -> Error (Nel.singleton (invalid_field name e)))
+        (Ok [])
+        lr
+    in
+    mapped_result
+    |> Result.map (fun _ -> ())
+    |> Result.map_error (fun errors -> Error.invalid_record r (Nel.rev errors))
+  | _, Kind.Any -> Ok ()
+  | _, Kind.Or lk -> check_or r k lk
+  | _ -> Error (Error.unexpected_kind k r)
+
+and check_or r k = function
+  | [] -> Error (Error.unexpected_kind k r) (* this result is dropped *)
+  | k :: lk ->
+    (match check r k with
+     | Error _ -> check_or r k lk
+     | result -> result)
+;;
+
 let null = function
   | Repr.Null -> Ok ()
   | x -> unexpected_kind Kind.null x
