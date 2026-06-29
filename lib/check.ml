@@ -36,30 +36,32 @@ let unexpected_kind kind expr =
   expr |> Error.unexpected_kind kind |> Result.error
 ;;
 
+(* Don't understand why Error.invalidate_field returns a Net.t? *)
 let invalid_field ?(alt = []) field error =
   Error.Invalid_field { field = Nel.(make field alt); error }
 ;;
 
 let rec check r k =
   match r, k with
-  (* Encoded data first :/ *)
-  | Repr.Record [  ("value", r); ("constr", Repr.String n) ], Kind.Branch(m, k)
+  (* Encoded data first ... *)
+  | Repr.Record [ ("value", r); ("constr", Repr.String n) ], Kind.Branch (m, k)
     when Misc.strim n = m -> check r k
-  | Repr.Record [ ("constr", Repr.String n); ("value", r) ], Kind.Branch(m, k)
+  | Repr.Record [ ("constr", Repr.String n); ("value", r) ], Kind.Branch (m, k)
     when Misc.strim n = m -> check r k
-  | Repr.Record [  ("first", fr); ("second", sr) ], Kind.Pair(fk, sk) ->
+  | Repr.Record [ ("first", fr); ("second", sr) ], Kind.Pair (fk, sk) ->
     (match check fr fk with
      | Error r -> Error r
      | _ -> check sr sk)
-  | Repr.Record [  ("second", sr); ("first", fr) ], Kind.Pair(fk, sk) ->
+  | Repr.Record [ ("second", sr); ("first", fr) ], Kind.Pair (fk, sk) ->
     (match check fr fk with
      | Error r -> Error r
      | _ -> check sr sk)
-  (* Basic data  *)
+  (* Basic data *)
   | Repr.Null, Kind.Null -> Ok ()
   | Repr.Bool _, Kind.Bool -> Ok ()
   | Repr.Int _, Kind.Int -> Ok ()
   | Repr.Float _, Kind.Float -> Ok ()
+  | Repr.String _, Kind.String -> Ok ()
   (* Composite data *)
   | Repr.List lr, Kind.List k ->
     let _i, mapped_result =

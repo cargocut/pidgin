@@ -100,5 +100,5 @@ val compare : t -> t -> int
 
 (** {1 Misc} *)
 
-(** [to_string kind] dump the given [kind] in a readdable way. *)
+(** [to_string kind] dump the given [kind] in a readable way. *)
 val to_string : t -> string
