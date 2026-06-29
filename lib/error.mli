@@ -31,6 +31,10 @@ type for_value =
       { errors : for_record Nel.t
       ; value : Repr.t
       }
+  | Invalid_constructor of
+      { error : for_value
+      ; value : Repr.t
+      }
   | Unexpected_value of string (** Used for custom error messages. *)
 
 (** Errors for records. *)
@@ -61,6 +65,9 @@ val invalid_subrecord : for_value -> for_record Nel.t
 
 (** Create a [Invalid_record] error. *)
 val invalid_record : Repr.t -> for_record Nel.t -> for_value
+
+(** Create a [Invalid_constructor] error. *)
+val invalid_constructor : Repr.t -> for_value -> for_value
 
 (** {1 Equalities} *)
 

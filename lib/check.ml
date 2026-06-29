@@ -44,14 +44,18 @@ let invalid_field ?(alt = []) field error =
 let rec check r k =
   match r, k with
   (* Encoded data first ... *)
-  | Repr.Record [ ("value", r); ("constr", Repr.String n) ], Kind.Branch (m, k)
-    when Misc.strim n = m -> check r k
-  | Repr.Record [ ("constr", Repr.String n); ("value", r) ], Kind.Branch (m, k)
-    when Misc.strim n = m -> check r k
-  | Repr.Record [ ("first", fr); ("second", sr) ], Kind.Pair (fk, sk) ->
-    (match check fr fk with
-     | Error r -> Error r
-     | _ -> check sr sk)
+  | Repr.Record [ ("value", sr); ("constr", Repr.String n) ], Kind.Branch (m, k)
+    when Misc.strim n = m ->
+    (match check sr k with
+     | Error e -> Error (Error.invalid_constructor r e)
+     | result -> result)
+  | Repr.Record [ ("constr", Repr.String n); ("value", sr) ], Kind.Branch (m, k)
+    when Misc.strim n = m ->
+    (match check sr k with
+     | Error e -> Error (Error.invalid_constructor r e)
+     | result -> result)
+  | Repr.Record [ ("first", _); ("second", _) ], Kind.Pair (fk, sk) ->
+    check r (Kind.record [ "first", fk; "second", sk ])
   | Repr.Record [ ("second", sr); ("first", fr) ], Kind.Pair (fk, sk) ->
     (match check fr fk with
      | Error r -> Error r
@@ -104,10 +108,10 @@ let rec check r k =
   | _ -> Error (Error.unexpected_kind k r)
 
 and check_or r k = function
-  | [] -> Error (Error.unexpected_kind k r) (* this result is dropped *)
-  | k :: lk ->
-    (match check r k with
-     | Error _ -> check_or r k lk
+  | [] -> Error (Error.unexpected_kind k r)
+  | hk :: tk ->
+    (match check r hk with
+     | Error _ -> check_or r k tk
      | result -> result)
 ;;
 

@@ -88,6 +88,13 @@ let rec error_for_value_to_repr = function
         ; "value", value
         ; "errors", list_of error_for_record_to_repr (Nel.to_list errors)
         ])
+  | Error.Invalid_constructor { error; value } ->
+    Repr.(
+      record
+        [ "kind", string "invalid_constructor"
+        ; "value", value
+        ; "error", error_for_value_to_repr error
+        ])
   | Error.Unexpected_value message ->
     Repr.(
       record [ "kind", string "unexpected_value"; "message", string message ])
