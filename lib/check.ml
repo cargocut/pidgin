@@ -42,10 +42,25 @@ let invalid_field ?(alt = []) field error =
 
 let rec check r k =
   match r, k with
+  (* Encoded data first :/ *)
+  | Repr.Record [  ("value", r); ("constr", Repr.String n) ], Kind.Branch(m, k)
+    when Misc.strim n = m -> check r k
+  | Repr.Record [ ("constr", Repr.String n); ("value", r) ], Kind.Branch(m, k)
+    when Misc.strim n = m -> check r k
+  | Repr.Record [  ("first", fr); ("second", sr) ], Kind.Pair(fk, sk) ->
+    (match check fr fk with
+     | Error r -> Error r
+     | _ -> check sr sk)
+  | Repr.Record [  ("second", sr); ("first", fr) ], Kind.Pair(fk, sk) ->
+    (match check fr fk with
+     | Error r -> Error r
+     | _ -> check sr sk)
+  (* Basic data  *)
   | Repr.Null, Kind.Null -> Ok ()
   | Repr.Bool _, Kind.Bool -> Ok ()
   | Repr.Int _, Kind.Int -> Ok ()
   | Repr.Float _, Kind.Float -> Ok ()
+  (* Composite data *)
   | Repr.List lr, Kind.List k ->
     let _i, mapped_result =
       List.fold_left
