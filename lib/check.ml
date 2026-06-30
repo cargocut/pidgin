@@ -99,6 +99,11 @@ let list_of v = function
     unexpected_kind Kind.(list any) x
 ;;
 
+let option some = function
+  | Repr.Null -> Ok None
+  | value -> Option.some <$> some value
+;;
+
 let record v = function
   | Repr.Record fields as value ->
     fields |> v |> Result.map_error (Error.invalid_record value)
@@ -116,6 +121,9 @@ let opt ?(normalize_keys = true) ?(alt = []) fields key v =
        | None -> aux xs
        | Some Repr.Null -> Ok None
        | Some value ->
+         (* NOTE: If the field exists we perform the validation. We
+            don't skip the result if the validation is invalid
+            because... it's optional, sure, but not lax!*)
          value
          |> v
          |> Result.map Option.some
@@ -124,18 +132,19 @@ let opt ?(normalize_keys = true) ?(alt = []) fields key v =
   aux (key :: alt)
 ;;
 
+let handle_null ~alt key v =
+  (* HACK: We want to handle optional field inside requirement
+     validation. *)
+  Repr.Null |> v |> Result.map_error (fun _ -> Error.missing_field ~alt key)
+;;
+
 let req ?(normalize_keys = true) ?(alt = []) fields key v =
   let rec aux = function
-    | [] -> Error (Error.missing_field ~alt key)
+    | [] -> handle_null ~alt key v
     | x :: xs ->
       (match Misc.find_assoc ~normalize_keys fields x with
        | None -> aux xs
-       | Some Repr.Null ->
-         (* HACK: We want to handle optional field inside requirement
-            validation. *)
-         Repr.Null
-         |> v
-         |> Result.map_error (fun _ -> Error.missing_field ~alt key)
+       | Some Repr.Null -> handle_null ~alt key v
        | Some value ->
          value |> v |> Result.map_error (Error.invalid_field ~alt key))
   in

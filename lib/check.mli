@@ -44,6 +44,9 @@ val list : Repr.t list t
 (** [list_of v] is a validator for list that satisfay [v]. *)
 val list_of : 'a t -> 'a list t
 
+(** [option v] is a validator to [option]. *)
+val option : 'a t -> 'a option t
+
 (** {1 Dealing with Records} *)
 
 val record : ((string * Repr.t) list -> 'a record) -> 'a t
