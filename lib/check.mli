@@ -57,8 +57,15 @@ val result : ok:'a t -> error:'b t -> ('a, 'b) result t
 (** [either ~left ~right] is a validator for either. *)
 val either : left:'a t -> right:'b t -> ('a, 'b) Either.t t
 
+(** [pair f s] is a validator for pair. *)
+val pair : 'a t -> 'b t -> ('a * 'b) t
+
+(** [triple f s t] is a validator for triple. *)
+val triple : 'a t -> 'b t -> 'c t -> ('a * 'b * 'c) t
+
 (** {1 Dealing with Records} *)
 
+(** [record (fun fields -> ...)] compose validators for records. *)
 val record : ((string * Repr.t) list -> 'a record) -> 'a t
 
 (** [opt ?normalize_keys ?alt fields field check] validates the

@@ -15,5 +15,6 @@ let () =
     ; Check_record_test.cases
     ; Check_corner_cases_test.cases
     ; Check_composite_test.cases
+    ; Check_product_test.cases
     ]
 ;;

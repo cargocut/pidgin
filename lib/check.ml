@@ -117,36 +117,6 @@ let k_sum_or_any constrs =
     Kind.sum Nel.(map (fun (c, _) -> c, Kind.any) (x :: xs))
 ;;
 
-let rec sum constrs = function
-  (* Deal with real records *)
-  | ( Repr.Record [ ("constr", String constr); ("value", value) ]
-    | Repr.Record [ ("value", value); ("constr", String constr) ] ) as repr ->
-    constr
-    |> Misc.find_assoc constrs
-    |> Option.fold
-         ~none:(unexpected_kind (k_sum_or_any constrs) repr)
-         ~some:(fun v -> v value)
-  (* Deal with desugaring *)
-  | Repr.String constr
-  | Repr.List [ String constr ]
-  | Repr.List [ String constr; Null ]
-  | Repr.Record [ ("constr", String constr) ] ->
-    sum constrs ((Repr.sum (fun () -> constr, Repr.null ())) ())
-  | Repr.List [ String constr; v ] ->
-    sum constrs ((Repr.sum (fun () -> constr, v)) ())
-  | repr ->
-    (* Error handling *)
-    unexpected_kind (k_sum_or_any constrs) repr
-;;
-
-let result ~ok ~error =
-  sum [ "ok", ok $ Result.ok; "error", error $ Result.error ]
-;;
-
-let either ~left ~right =
-  sum [ "left", left $ Either.left; "right", right $ Either.right ]
-;;
-
 let record v = function
   | Repr.Record fields as value ->
     fields |> v |> Result.map_error (Error.invalid_record value)
@@ -196,4 +166,58 @@ let req ?(normalize_keys = true) ?(alt = []) fields key v =
 
 let use_record fields v =
   Repr.record fields |> v |> Result.map_error Error.invalid_subrecord
+;;
+
+let rec sum constrs = function
+  (* Deal with real records *)
+  | ( Repr.Record [ ("constr", String constr); ("value", value) ]
+    | Repr.Record [ ("value", value); ("constr", String constr) ] ) as repr ->
+    constr
+    |> Misc.find_assoc constrs
+    |> Option.fold
+         ~none:(unexpected_kind (k_sum_or_any constrs) repr)
+         ~some:(fun v -> v value)
+  (* Deal with desugaring *)
+  | Repr.String constr
+  | Repr.List [ String constr ]
+  | Repr.List [ String constr; Null ]
+  | Repr.Record [ ("constr", String constr) ] ->
+    sum constrs ((Repr.sum (fun () -> constr, Repr.null ())) ())
+  | Repr.List [ String constr; v ] ->
+    sum constrs ((Repr.sum (fun () -> constr, v)) ())
+  | repr ->
+    (* Error handling *)
+    unexpected_kind (k_sum_or_any constrs) repr
+;;
+
+let result ~ok ~error =
+  sum [ "ok", ok $ Result.ok; "error", error $ Result.error ]
+;;
+
+let either ~left ~right =
+  sum [ "left", left $ Either.left; "right", right $ Either.right ]
+;;
+
+let rec pair fst snd = function
+  | Repr.Record [ _; _ ] as repr ->
+    record
+      (fun fields ->
+         let+ a = req fields "first" ~alt:[ "fst" ] fst
+         and+ b = req fields "second" ~alt:[ "snd" ] snd in
+         a, b)
+      repr
+  | List [ a; b ] -> pair fst snd (Repr.pair Fun.id Fun.id (a, b))
+  | List [ a ] -> pair fst snd (Repr.pair Fun.id Repr.null (a, ()))
+  | List [] ->
+    pair fst snd Repr.(record [ "first", null (); "second", null () ])
+  | repr -> unexpected_kind Kind.(pair any any) repr
+;;
+
+let rec triple f s t = function
+  | Repr.List [ a; b; c ] ->
+    triple f s t (Repr.triple Fun.id Fun.id Fun.id (a, b, c))
+  | Repr.List [ a; b ] ->
+    triple f s t Repr.(triple Fun.id Fun.id null (a, b, ()))
+  | Repr.List [ a ] -> triple f s t Repr.(triple Fun.id null null (a, (), ()))
+  | repr -> (pair f (pair s t) $ fun (a, (b, c)) -> a, b, c) repr
 ;;
