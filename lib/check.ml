@@ -104,6 +104,49 @@ let option some = function
   | value -> Option.some <$> some value
 ;;
 
+let k_sum_or_any constrs =
+  match constrs with
+  | [] ->
+    (* KLUDGE: We can relay on non-empty list but it looks heavy.
+       There is no [Kind.absurd] because it is an internal
+       representation. *)
+    Kind.record [ "absurd", Kind.any ]
+  | x :: xs ->
+    (* KLUDGE: since kind are not deductible from validators, we
+       lose that information. *)
+    Kind.sum Nel.(map (fun (c, _) -> c, Kind.any) (x :: xs))
+;;
+
+let rec sum constrs = function
+  (* Deal with real records *)
+  | ( Repr.Record [ ("constr", String constr); ("value", value) ]
+    | Repr.Record [ ("value", value); ("constr", String constr) ] ) as repr ->
+    constr
+    |> Misc.find_assoc constrs
+    |> Option.fold
+         ~none:(unexpected_kind (k_sum_or_any constrs) repr)
+         ~some:(fun v -> v value)
+  (* Deal with desugaring *)
+  | Repr.String constr
+  | Repr.List [ String constr ]
+  | Repr.List [ String constr; Null ]
+  | Repr.Record [ ("constr", String constr) ] ->
+    sum constrs ((Repr.sum (fun () -> constr, Repr.null ())) ())
+  | Repr.List [ String constr; v ] ->
+    sum constrs ((Repr.sum (fun () -> constr, v)) ())
+  | repr ->
+    (* Error handling *)
+    unexpected_kind (k_sum_or_any constrs) repr
+;;
+
+let result ~ok ~error =
+  sum [ "ok", ok $ Result.ok; "error", error $ Result.error ]
+;;
+
+let either ~left ~right =
+  sum [ "left", left $ Either.left; "right", right $ Either.right ]
+;;
+
 let record v = function
   | Repr.Record fields as value ->
     fields |> v |> Result.map_error (Error.invalid_record value)

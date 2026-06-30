@@ -30,7 +30,7 @@ let rec repr ppf =
 let rec kind ppf =
   let open Format in
   function
-  | Kind.Any -> pp_print_string ppf "?any"
+  | Kind.Any -> pp_print_string ppf "any"
   | Kind.Null -> pp_print_string ppf "null"
   | Kind.Bool -> pp_print_string ppf "bool"
   | Kind.Int -> pp_print_string ppf "int"

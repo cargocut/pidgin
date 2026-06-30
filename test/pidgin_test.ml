@@ -13,6 +13,7 @@ let () =
     ; Check_simple_test.cases
     ; Check_list_test.cases
     ; Check_record_test.cases
-    ; Check_corner_cases.cases
+    ; Check_corner_cases_test.cases
+    ; Check_composite_test.cases
     ]
 ;;

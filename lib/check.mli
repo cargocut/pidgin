@@ -47,6 +47,16 @@ val list_of : 'a t -> 'a list t
 (** [option v] is a validator to [option]. *)
 val option : 'a t -> 'a option t
 
+(** [sum constrs expr] From the [constrs] list, select the validator
+    to use for validating sums. *)
+val sum : (string * 'a t) list -> 'a t
+
+(** [result ~ok ~error] is a validator for result. *)
+val result : ok:'a t -> error:'b t -> ('a, 'b) result t
+
+(** [either ~left ~right] is a validator for either. *)
+val either : left:'a t -> right:'b t -> ('a, 'b) Either.t t
+
 (** {1 Dealing with Records} *)
 
 val record : ((string * Repr.t) list -> 'a record) -> 'a t
