@@ -14,3 +14,10 @@ val find_assoc
   -> (string * 'a) list
   -> string
   -> 'a option
+
+(** [escape_spaces s] escape spaces for the given string [s]. *)
+val escape_spaces : string -> string
+
+(** [concat_with ~sep f xs] concat every elts of [xs] with [sep] using
+    [f] on each element. *)
+val concat_with : sep:string -> ('a -> string) -> 'a list -> string

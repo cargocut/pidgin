@@ -10,3 +10,10 @@ let checked ok =
   let error = Alcotest.testable Pp.error_for_value Error.equal in
   Alcotest.result ok error
 ;;
+
+let sexp_parsed =
+  let error =
+    Alcotest.testable Pp.error_for_sexp_parsing Error.equal_for_sexp_parsing
+  and ok = Alcotest.testable Pp.sexp Sexp.equal in
+  Alcotest.result ok error
+;;

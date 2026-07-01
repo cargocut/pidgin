@@ -30,6 +30,8 @@ and for_record =
   | Missing_field of string Nel.t
   | Invalid_subrecord of for_value
 
+type sexp_parsing = Non_terminated_node of int
+
 let rec equal_for_value a b =
   match a, b with
   | Unexpected_kind { expected; given; value }, Unexpected_kind b ->
@@ -60,6 +62,11 @@ and equal_for_record a b =
   | Invalid_field _, _ | Missing_field _, _ | Invalid_subrecord _, _ -> false
 ;;
 
+let equal_for_sexp_parsing a b =
+  match a, b with
+  | Non_terminated_node a, Non_terminated_node b -> Int.equal a b
+;;
+
 let equal = equal_for_value
 
 let unexpected_kind expected value =
@@ -80,3 +87,4 @@ let invalid_field ?(alt = []) field error =
 let invalid_record value errors = Invalid_record { errors; value }
 let invalid_subrecord err = Nel.singleton @@ Invalid_subrecord err
 let unexpected_value ?value message = Unexpected_value { value; message }
+let non_terminated_node pos = Non_terminated_node pos

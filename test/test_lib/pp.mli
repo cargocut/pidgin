@@ -12,8 +12,14 @@ val repr : Format.formatter -> Pidgin.Repr.t -> unit
 (** A pretty-printer for kinds. *)
 val kind : Format.formatter -> Kind.t -> unit
 
+(** A pretty-printer for Sexp. *)
+val sexp : Format.formatter -> Sexp.t -> unit
+
 (** A pretty-printer for value_error. *)
 val error_for_value : Format.formatter -> Error.for_value -> unit
+
+(** A pretty-printer for sexp_parsing. *)
+val error_for_sexp_parsing : Format.formatter -> Error.sexp_parsing -> unit
 
 (** A pretty-printer for checked values. *)
 val checked_value
@@ -21,3 +27,6 @@ val checked_value
   -> Format.formatter
   -> 'a Check.value
   -> unit
+
+(** A pretty-printer for checked sexp. *)
+val sexp_parsed : Format.formatter -> Sexp.parsed -> unit

@@ -45,6 +45,9 @@ and for_record =
   | Missing_field of string Nel.t
   | Invalid_subrecord of for_value
 
+(** Errors for S-Expression parsing. *)
+type sexp_parsing = Non_terminated_node of int
+
 (** {1 Smart Constructors} *)
 
 (** Create an [Unexpected_kind] error. *)
@@ -68,6 +71,8 @@ val invalid_subrecord : for_value -> for_record Nel.t
 (** Create a [Invalid_record] error. *)
 val invalid_record : Repr.t -> for_record Nel.t -> for_value
 
+val non_terminated_node : int -> sexp_parsing
+
 (** {1 Equalities} *)
 
 (** Equality between value errors. *)
@@ -75,6 +80,9 @@ val equal_for_value : for_value -> for_value -> bool
 
 (** Equality between record errors. *)
 val equal_for_record : for_record -> for_record -> bool
+
+(** Equality between Sexp Parsing errors. *)
+val equal_for_sexp_parsing : sexp_parsing -> sexp_parsing -> bool
 
 (** See {!val:equal_for_value}. *)
 val equal : for_value -> for_value -> bool

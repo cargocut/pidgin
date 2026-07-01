@@ -55,6 +55,20 @@ let rec kind ppf =
       fields
 ;;
 
+let rec sexp ppf = function
+  | Sexp.Atom x -> Format.fprintf ppf "%s" (Misc.escape_spaces x)
+  | Sexp.Node x -> Format.fprintf ppf "@[<hov 1>(%a)@]" sexp_list x
+
+and sexp_list ppf = function
+  | x :: (_ :: _ as xs) ->
+    let () = Format.fprintf ppf "%a@ " sexp x in
+    sexp_list ppf xs
+  | x :: xs ->
+    let () = Format.fprintf ppf "%a" sexp x in
+    sexp_list ppf xs
+  | [] -> ()
+;;
+
 let field_with_alt Nel.(field :: alt) =
   match alt with
   | [] -> Repr.string field
@@ -119,9 +133,21 @@ let error_for_value ppf err =
   err |> error_for_value_to_repr |> Format.fprintf ppf "%a" repr
 ;;
 
-let checked_value ok =
+let error_for_sexp_parsing_to_repr = function
+  | Error.Non_terminated_node pos ->
+    Repr.(record [ "kind", string "non_terminated_node"; "position", int pos ])
+;;
+
+let error_for_sexp_parsing ppf err =
+  err |> error_for_sexp_parsing_to_repr |> Format.fprintf ppf "%a" repr
+;;
+
+let result ok error =
   let open Format in
   pp_print_result
     ~ok:(fun ppf x -> fprintf ppf "Ok @[<hov 1>%a@]" ok x)
-    ~error:(fun ppf x -> fprintf ppf "Error @[<hov 1>%a@]" error_for_value x)
+    ~error:(fun ppf x -> fprintf ppf "Error @[<hov 1>%a@]" error x)
 ;;
+
+let checked_value ok = result ok error_for_value
+let sexp_parsed = result sexp error_for_sexp_parsing
