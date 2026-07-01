@@ -23,6 +23,9 @@ type 'a t = (Repr.t, 'a) fn
 
 (** {1 Data Validation} *)
 
+(** [const x] always succeed with [x]. *)
+val const : 'a -> ('b, 'a) fn
+
 (** Validator from {!type:Repr.t} to [unit]. *)
 val null : unit t
 
@@ -32,11 +35,24 @@ val bool : bool t
 (** Validator from {!type:Repr.t} to [int]. *)
 val int : int t
 
+(** Validator from {!type:Repr.t} to [int32]. *)
+val int32 : int32 t
+
+(** Validator from {!type:Repr.t} to [int64]. *)
+val int64 : int64 t
+
 (** Validator from {!type:Repr.t} to [float]. *)
 val float : float t
 
+(** Validator from {!type:Repr.t} to arbitrary numbers (using [float]
+    as representation). *)
+val number : float t
+
 (** Validator from {!type:Repr.t} to [string]. *)
 val string : string t
+
+(** Validator from {!type:Repr.t} to [char]. *)
+val char : char t
 
 (** Validator from {!type:Repr.t} to [list]. *)
 val list : Repr.t list t
@@ -44,8 +60,42 @@ val list : Repr.t list t
 (** [list_of v] is a validator for list that satisfay [v]. *)
 val list_of : 'a t -> 'a list t
 
+(** [option v] is a validator to [option]. *)
+val option : 'a t -> 'a option t
+
+(** [sum constrs expr] From the [constrs] list, select the validator
+    to use for validating sums. *)
+val sum : (string * 'a t) list -> 'a t
+
+(** [result ~ok ~error] is a validator for result. *)
+val result : ok:'a t -> error:'b t -> ('a, 'b) result t
+
+(** [either ~left ~right] is a validator for either. *)
+val either : left:'a t -> right:'b t -> ('a, 'b) Either.t t
+
+(** [pair f s] is a validator for pair. *)
+val pair : 'a t -> 'b t -> ('a * 'b) t
+
+(** [triple f s t] is a validator for triple. *)
+val triple : 'a t -> 'b t -> 'c t -> ('a * 'b * 'c) t
+
+(** {2 Predicates} *)
+
+(** [where ?message p] validate using [p] and raise [message] if
+    [p x = false]. *)
+val where : ?value:Repr.t -> ?message:string -> ('a -> bool) -> ('a, 'a) fn
+
+(** [where_opt ?message p] validate using [p] and raise [message] if
+    [p x = None]. *)
+val where_opt
+  :  ?value:Repr.t
+  -> ?message:string
+  -> ('a -> 'b option)
+  -> ('a, 'b) fn
+
 (** {1 Dealing with Records} *)
 
+(** [record (fun fields -> ...)] compose validators for records. *)
 val record : ((string * Repr.t) list -> 'a record) -> 'a t
 
 (** [opt ?normalize_keys ?alt fields field check] validates the

@@ -30,7 +30,7 @@ let rec repr ppf =
 let rec kind ppf =
   let open Format in
   function
-  | Kind.Any -> pp_print_string ppf "?any"
+  | Kind.Any -> pp_print_string ppf "any"
   | Kind.Null -> pp_print_string ppf "null"
   | Kind.Bool -> pp_print_string ppf "bool"
   | Kind.Int -> pp_print_string ppf "int"
@@ -88,9 +88,13 @@ let rec error_for_value_to_repr = function
         ; "value", value
         ; "errors", list_of error_for_record_to_repr (Nel.to_list errors)
         ])
-  | Error.Unexpected_value message ->
+  | Error.Unexpected_value { value; message } ->
     Repr.(
-      record [ "kind", string "unexpected_value"; "message", string message ])
+      record
+        [ "kind", string "unexpected_value"
+        ; "message", string message
+        ; "value", option Fun.id value
+        ])
 
 and error_for_record_to_repr = function
   | Error.Missing_field field ->
