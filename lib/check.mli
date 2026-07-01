@@ -51,6 +51,9 @@ val number : float t
 (** Validator from {!type:Repr.t} to [string]. *)
 val string : string t
 
+(** Validator from {!type:Repr.t} to [char]. *)
+val char : char t
+
 (** Validator from {!type:Repr.t} to [list]. *)
 val list : Repr.t list t
 
@@ -80,11 +83,15 @@ val triple : 'a t -> 'b t -> 'c t -> ('a * 'b * 'c) t
 
 (** [where ?message p] validate using [p] and raise [message] if
     [p x = false]. *)
-val where : ?message:string -> ('a -> bool) -> ('a, 'a) fn
+val where : ?value:Repr.t -> ?message:string -> ('a -> bool) -> ('a, 'a) fn
 
 (** [where_opt ?message p] validate using [p] and raise [message] if
     [p x = None]. *)
-val where_opt : ?message:string -> ('a -> 'b option) -> ('a, 'b) fn
+val where_opt
+  :  ?value:Repr.t
+  -> ?message:string
+  -> ('a -> 'b option)
+  -> ('a, 'b) fn
 
 (** {1 Dealing with Records} *)
 

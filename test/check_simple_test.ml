@@ -143,6 +143,30 @@ open struct
         expected
         computed)
   ;;
+
+  let char0 =
+    test_case "char" `Quick (fun () ->
+      let repr = Repr.string "H" in
+      let expected = Ok 'H'
+      and computed = repr |> Check.char in
+      check (Test_lib.Testable.checked char) "should be equal" expected computed)
+  ;;
+
+  let char1 =
+    test_case "char" `Quick (fun () ->
+      let repr = Repr.int 97 in
+      let expected = Ok 'a'
+      and computed = repr |> Check.char in
+      check (Test_lib.Testable.checked char) "should be equal" expected computed)
+  ;;
+
+  let char2 =
+    test_case "char" `Quick (fun () ->
+      let repr = Repr.string "Hello World" in
+      let expected = Error (Error.unexpected_value ~value:repr "char expected")
+      and computed = repr |> Check.char in
+      check (Test_lib.Testable.checked char) "should be equal" expected computed)
+  ;;
 end
 
 let cases =
@@ -161,5 +185,8 @@ let cases =
     ; string0
     ; string1
     ; string2
+    ; char0
+    ; char1
+    ; char2
     ] )
 ;;

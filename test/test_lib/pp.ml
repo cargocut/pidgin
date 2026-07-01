@@ -88,9 +88,13 @@ let rec error_for_value_to_repr = function
         ; "value", value
         ; "errors", list_of error_for_record_to_repr (Nel.to_list errors)
         ])
-  | Error.Unexpected_value message ->
+  | Error.Unexpected_value { value; message } ->
     Repr.(
-      record [ "kind", string "unexpected_value"; "message", string message ])
+      record
+        [ "kind", string "unexpected_value"
+        ; "message", string message
+        ; "value", option Fun.id value
+        ])
 
 and error_for_record_to_repr = function
   | Error.Missing_field field ->

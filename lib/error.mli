@@ -31,7 +31,10 @@ type for_value =
       { errors : for_record Nel.t
       ; value : Repr.t
       }
-  | Unexpected_value of string (** Used for custom error messages. *)
+  | Unexpected_value of
+      { value : Repr.t option
+      ; message : string
+      } (** Used for custom error messages. *)
 
 (** Errors for records. *)
 and for_record =
@@ -48,7 +51,7 @@ and for_record =
 val unexpected_kind : Kind.t -> Repr.t -> for_value
 
 (** Used for a custom error message. *)
-val unexpected_value : string -> for_value
+val unexpected_value : ?value:Repr.t -> string -> for_value
 
 (** Create an [Invalid_list] error. *)
 val invalid_list : Repr.t -> (int * for_value) Nel.t -> for_value

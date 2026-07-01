@@ -233,14 +233,14 @@ let rec triple f s t = function
     |> map_expected_kind Kind.(pair any (pair any any))
 ;;
 
-let where ?(message = "Predicate not satisfied") predicate x =
-  if predicate x then Ok x else Error (Error.unexpected_value message)
+let where ?value ?(message = "Predicate not satisfied") predicate x =
+  if predicate x then Ok x else Error (Error.unexpected_value ?value message)
 ;;
 
-let where_opt ?(message = "Predicate not satisfied") predicate x =
+let where_opt ?value ?(message = "Predicate not satisfied") predicate x =
   match predicate x with
   | Some x -> Ok x
-  | None -> Error (Error.unexpected_value message)
+  | None -> Error (Error.unexpected_value ?value message)
 ;;
 
 let int32 = function
@@ -249,7 +249,11 @@ let int32 = function
     repr
     |> sum
          [ ( "int32"
-           , string & where_opt ~message:"int32 expected" Int32.of_string_opt )
+           , string
+             & where_opt
+                 ~value:repr
+                 ~message:"int32 expected"
+                 Int32.of_string_opt )
          ]
     |> map_expected_kind Kind.(or_ int (branch "int32" string))
 ;;
@@ -261,8 +265,11 @@ let int64 = function
     |> (int32 $ Int64.of_int32)
        / sum
            [ ( "int64"
-             , string & where_opt ~message:"int64 expected" Int64.of_string_opt
-             )
+             , string
+               & where_opt
+                   ~value:repr
+                   ~message:"int64 expected"
+                   Int64.of_string_opt )
            ]
     |> map_expected_kind
          Kind.(
@@ -280,4 +287,12 @@ let number = function
            unify
              Nel.(
                int :: [ float; branch "int32" string; branch "int64" string ]))
+;;
+
+let char = function
+  | Repr.String s when Int.equal (Stdlib.String.length s) 1 -> Ok s.[0]
+  | Repr.Int i as repr ->
+    (try Ok (Char.chr i) with
+     | _ -> Error (Error.unexpected_value ~value:repr "char expected"))
+  | repr -> Error (Error.unexpected_value ~value:repr "char expected")
 ;;

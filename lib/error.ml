@@ -17,7 +17,10 @@ type for_value =
       { errors : for_record Nel.t
       ; value : Repr.t
       }
-  | Unexpected_value of string
+  | Unexpected_value of
+      { value : Repr.t option
+      ; message : string
+      }
 
 and for_record =
   | Invalid_field of
@@ -39,7 +42,8 @@ let rec equal_for_value a b =
          (fun (i, err) (i2, err2) -> Int.equal i i2 && equal_for_value err err2)
          errors
          b.errors
-  | Unexpected_value a, Unexpected_value b -> String.equal a b
+  | Unexpected_value { value; message }, Unexpected_value b ->
+    String.equal message b.message && Option.equal Repr.equal value b.value
   | Invalid_record { errors; value }, Invalid_record b ->
     Repr.equal value b.value && Nel.equal equal_for_record errors b.errors
   | Unexpected_kind _, _
@@ -75,4 +79,4 @@ let invalid_field ?(alt = []) field error =
 
 let invalid_record value errors = Invalid_record { errors; value }
 let invalid_subrecord err = Nel.singleton @@ Invalid_subrecord err
-let unexpected_value message = Unexpected_value message
+let unexpected_value ?value message = Unexpected_value { value; message }
