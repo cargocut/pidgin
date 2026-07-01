@@ -23,6 +23,9 @@ type 'a t = (Repr.t, 'a) fn
 
 (** {1 Data Validation} *)
 
+(** [const x] always succeed with [x]. *)
+val const : 'a -> ('b, 'a) fn
+
 (** Validator from {!type:Repr.t} to [unit]. *)
 val null : unit t
 
@@ -32,8 +35,18 @@ val bool : bool t
 (** Validator from {!type:Repr.t} to [int]. *)
 val int : int t
 
+(** Validator from {!type:Repr.t} to [int32]. *)
+val int32 : int32 t
+
+(** Validator from {!type:Repr.t} to [int64]. *)
+val int64 : int64 t
+
 (** Validator from {!type:Repr.t} to [float]. *)
 val float : float t
+
+(** Validator from {!type:Repr.t} to arbitrary numbers (using [float]
+    as representation). *)
+val number : float t
 
 (** Validator from {!type:Repr.t} to [string]. *)
 val string : string t
@@ -62,6 +75,16 @@ val pair : 'a t -> 'b t -> ('a * 'b) t
 
 (** [triple f s t] is a validator for triple. *)
 val triple : 'a t -> 'b t -> 'c t -> ('a * 'b * 'c) t
+
+(** {2 Predicates} *)
+
+(** [where ?message p] validate using [p] and raise [message] if
+    [p x = false]. *)
+val where : ?message:string -> ('a -> bool) -> ('a, 'a) fn
+
+(** [where_opt ?message p] validate using [p] and raise [message] if
+    [p x = None]. *)
+val where_opt : ?message:string -> ('a -> 'b option) -> ('a, 'b) fn
 
 (** {1 Dealing with Records} *)
 

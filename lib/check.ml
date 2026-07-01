@@ -32,8 +32,16 @@ end
 include Infix
 include Syntax
 
+let const x _ = Ok x
+
 let unexpected_kind kind expr =
   expr |> Error.unexpected_kind kind |> Result.error
+;;
+
+let map_expected_kind expected =
+  Result.map_error (function
+    | Error.Unexpected_kind err -> Error.Unexpected_kind { err with expected }
+    | err -> err)
 ;;
 
 let null = function
@@ -219,5 +227,57 @@ let rec triple f s t = function
   | Repr.List [ a; b ] ->
     triple f s t Repr.(triple Fun.id Fun.id null (a, b, ()))
   | Repr.List [ a ] -> triple f s t Repr.(triple Fun.id null null (a, (), ()))
-  | repr -> (pair f (pair s t) $ fun (a, (b, c)) -> a, b, c) repr
+  | repr ->
+    repr
+    |> (pair f (pair s t) $ fun (a, (b, c)) -> a, b, c)
+    |> map_expected_kind Kind.(pair any (pair any any))
+;;
+
+let where ?(message = "Predicate not satisfied") predicate x =
+  if predicate x then Ok x else Error (Error.unexpected_value message)
+;;
+
+let where_opt ?(message = "Predicate not satisfied") predicate x =
+  match predicate x with
+  | Some x -> Ok x
+  | None -> Error (Error.unexpected_value message)
+;;
+
+let int32 = function
+  | Repr.Int x -> Ok (Int32.of_int x)
+  | repr ->
+    repr
+    |> sum
+         [ ( "int32"
+           , string & where_opt ~message:"int32 expected" Int32.of_string_opt )
+         ]
+    |> map_expected_kind Kind.(or_ int (branch "int32" string))
+;;
+
+let int64 = function
+  | Repr.Int x -> Ok (Int64.of_int x)
+  | repr ->
+    repr
+    |> (int32 $ Int64.of_int32)
+       / sum
+           [ ( "int64"
+             , string & where_opt ~message:"int64 expected" Int64.of_string_opt
+             )
+           ]
+    |> map_expected_kind
+         Kind.(
+           unify Nel.(int :: [ branch "int32" string; branch "int64" string ]))
+;;
+
+let number = function
+  | Repr.Int x -> Ok (Float.of_int x)
+  | Repr.Float x -> Ok x
+  | repr ->
+    repr
+    |> (int32 $ Int32.to_float) / (int64 $ Int64.to_float)
+    |> map_expected_kind
+         Kind.(
+           unify
+             Nel.(
+               int :: [ float; branch "int32" string; branch "int64" string ]))
 ;;

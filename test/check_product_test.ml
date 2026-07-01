@@ -86,6 +86,23 @@ open struct
         expected
         computed)
   ;;
+
+  let triple2 =
+    test_case "triple" `Quick (fun () ->
+      let repr =
+        Repr.List [ Int 42; String "Hello World"; Bool true; String "Hello" ]
+      and v = Check.(triple int string (option bool)) in
+      let expected =
+        Error (Error.unexpected_kind Kind.(pair any (pair any any)) repr)
+      and computed = v repr in
+      check
+        (Test_lib.Testable.checked (triple int string (option bool)))
+        "should be equal"
+        expected
+        computed)
+  ;;
 end
 
-let cases = "Check (Product)", [ pair0; pair1; pair2; pair3; triple0; triple1 ]
+let cases =
+  "Check (Product)", [ pair0; pair1; pair2; pair3; triple0; triple1; triple2 ]
+;;

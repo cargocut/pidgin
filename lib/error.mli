@@ -47,6 +47,9 @@ and for_record =
 (** Create an [Unexpected_kind] error. *)
 val unexpected_kind : Kind.t -> Repr.t -> for_value
 
+(** Used for a custom error message. *)
+val unexpected_value : string -> for_value
+
 (** Create an [Invalid_list] error. *)
 val invalid_list : Repr.t -> (int * for_value) Nel.t -> for_value
 

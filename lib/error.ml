@@ -75,3 +75,4 @@ let invalid_field ?(alt = []) field error =
 
 let invalid_record value errors = Invalid_record { errors; value }
 let invalid_subrecord err = Nel.singleton @@ Invalid_subrecord err
+let unexpected_value message = Unexpected_value message
