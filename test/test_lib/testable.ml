@@ -12,13 +12,13 @@ let checked ok =
 ;;
 
 let sexp_parsed =
-  let error = Alcotest.testable Pp.error_for_sexp_parsing Error.Sexp.equal
+  let error = Alcotest.testable Pp.sexp_parsing_error Eq.sexp_parsing_error
   and ok = Alcotest.testable Pp.sexp Sexp.equal in
   Alcotest.result ok error
 ;;
 
 let csexp_parsed =
-  let error = Alcotest.testable Pp.error_for_csexp_parsing Error.Csexp.equal
+  let error = Alcotest.testable Pp.csexp_parsing_error Eq.csexp_parsing_error
   and ok = Alcotest.testable Pp.sexp Sexp.equal in
   Alcotest.result ok error
 ;;

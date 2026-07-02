@@ -32,3 +32,31 @@ and record_error a b =
     Nel.equal String.equal field b.field && check_error error b.error
   | Invalid_field _, _ | Missing_field _, _ | Invalid_subrecord _, _ -> false
 ;;
+
+let sexp_parsing_error a b =
+  match a, b with
+  | Sexp.Non_terminated_node a, Sexp.Non_terminated_node b
+  | Non_opened_node a, Non_opened_node b -> Int.equal a b
+  | Non_terminated_node _, _ | Non_opened_node _, _ -> false
+;;
+
+let csexp_parsing_error a b =
+  match a, b with
+  | ( Csexp.Premature_end_of_atom { expected_length; given_length; position }
+    , Csexp.Premature_end_of_atom b ) ->
+    Int.equal position b.position
+    && Int.equal expected_length b.expected_length
+    && Int.equal given_length b.given_length
+  | Expected_atom a, Expected_atom b
+  | Expected_number a, Expected_number b
+  | Expected_number_or_column a, Expected_number_or_column b
+  | Non_terminated_node a, Non_terminated_node b
+  | Non_opened_node a, Non_opened_node b -> Int.equal a b
+  | Premature_end_of_atom _, _
+  | Expected_atom _, _
+  | Expected_number_or_column _, _
+  | Expected_number _, _
+  | Unexpected_char (_, _), _
+  | Non_terminated_node _, _
+  | Non_opened_node _, _ -> false
+;;

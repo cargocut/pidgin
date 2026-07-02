@@ -14,8 +14,22 @@ type t = Sexp.t =
   | Atom of string
   | Node of t list
 
+(** Errors that may occur during parsing. *)
+type parsing_error =
+  | Premature_end_of_atom of
+      { expected_length : int
+      ; given_length : int
+      ; position : int
+      }
+  | Expected_atom of int
+  | Expected_number_or_column of int
+  | Expected_number of int
+  | Unexpected_char of char * int
+  | Non_terminated_node of int
+  | Non_opened_node of int
+
 (** Describe a parsed Canonical S-Expression. *)
-type parsed = (t, Error.Csexp.t) result
+type parsed = (t, parsing_error) result
 
 (** {1 Parsing} *)
 
