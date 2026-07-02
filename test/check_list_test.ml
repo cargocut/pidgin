@@ -36,7 +36,10 @@ open struct
   let list2 =
     test_case "list" `Quick (fun () ->
       let repr = Repr.int 42 in
-      let expected = Error (Error.unexpected_kind Kind.(list any) repr)
+      let expected =
+        Error
+          (Check.Unexpected_kind
+             { expected = Kind.(list any); given = Kind.int; value = repr })
       and computed = repr |> Check.(list_of string) in
       check
         (Test_lib.Testable.checked (list string))
@@ -67,12 +70,24 @@ open struct
       let repr = Repr.(list_of string) [ "foo"; "bar" ] in
       let expected =
         Error
-          (Error.invalid_list
-             repr
-             (Nel.from_list_exn
-                [ 0, Error.unexpected_kind Kind.(list any) (Repr.string "foo")
-                ; 1, Error.unexpected_kind Kind.(list any) (Repr.string "bar")
-                ]))
+          (Check.Invalid_list
+             { value = repr
+             ; errors =
+                 Nel.from_list_exn
+                   [ ( 0
+                     , Check.Unexpected_kind
+                         { expected = Kind.(list any)
+                         ; value = Repr.string "foo"
+                         ; given = Kind.string
+                         } )
+                   ; ( 1
+                     , Check.Unexpected_kind
+                         { expected = Kind.(list any)
+                         ; value = Repr.string "bar"
+                         ; given = Kind.string
+                         } )
+                   ]
+             })
       and computed = repr |> Check.(list_of (list_of int)) in
       check
         (Test_lib.Testable.checked (list (list int)))

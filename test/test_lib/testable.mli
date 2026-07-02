@@ -13,3 +13,9 @@ val kind : Kind.t Alcotest.testable
 
 (** A testable for validated values. *)
 val checked : 'a Alcotest.testable -> 'a Check.value Alcotest.testable
+
+(** A testable for parsed S-expressions. *)
+val sexp_parsed : Sexp.parsed Alcotest.testable
+
+(** A testable for parsed Canonical S-expressions.. *)
+val csexp_parsed : Csexp.parsed Alcotest.testable

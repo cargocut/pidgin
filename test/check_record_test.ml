@@ -30,11 +30,13 @@ open struct
     test_case "human" `Quick (fun () ->
       let repr = Repr.record [] in
       let expected =
-        Error.invalid_record
-          repr
-          (Nel.append
-             (Error.missing_field ~alt:[ "nick"; "pseudo" ] "nickname")
-             (Error.missing_field "gender"))
+        Check.Invalid_record
+          { value = repr
+          ; errors =
+              Nel.(
+                Check.Missing_field (singleton "gender")
+                :: [ Check.Missing_field ("nickname" :: [ "nick"; "pseudo" ]) ])
+          }
         |> Result.error
       and computed = repr |> Human.from_pidgin in
       check
@@ -86,12 +88,21 @@ open struct
           ]
       in
       let expected =
-        Error.invalid_record
-          repr
-          (Nel.append
-             (Error.missing_field ~alt:[ "nick"; "pseudo" ] "nickname")
-             (Error.invalid_field "age"
-              @@ Error.unexpected_kind Kind.int (Repr.string "trente")))
+        Check.Invalid_record
+          { value = repr
+          ; errors =
+              Nel.(
+                Check.Invalid_field
+                  { field = Nel.singleton "age"
+                  ; error =
+                      Check.Unexpected_kind
+                        { expected = Kind.int
+                        ; value = Repr.string "trente"
+                        ; given = Kind.string
+                        }
+                  }
+                :: [ Check.Missing_field ("nickname" :: [ "nick"; "pseudo" ]) ])
+          }
         |> Result.error
       and computed = repr |> Human.from_pidgin in
       check
@@ -210,12 +221,20 @@ open struct
           ]
       in
       let expected =
-        Error.invalid_record
-          repr
-          (Nel.append
-             (Error.invalid_subrecord
-                (Error.invalid_record repr (Error.missing_field "gender")))
-             (Error.missing_field ~alt:[ "mail" ] "email"))
+        Check.Invalid_record
+          { value = repr
+          ; errors =
+              Nel.(
+                Check.Missing_field ("email" :: [ "mail" ])
+                :: [ Check.Invalid_subrecord
+                       (Check.Invalid_record
+                          { value = repr
+                          ; errors =
+                              singleton
+                              @@ Check.Missing_field (singleton "gender")
+                          })
+                   ])
+          }
         |> Result.error
       and computed = repr |> User.from_pidgin in
       check
