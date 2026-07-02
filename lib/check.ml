@@ -3,10 +3,37 @@
 
    SPDX-License-Identifier: BSD-3-Clause *)
 
-type 'a value = ('a, Error.Check.for_value) result
+type value_error=
+  | Unexpected_kind of
+      { expected : Kind.t
+      ; given : Kind.t
+      ; value : Repr.t
+      }
+  | Invalid_list of
+      { errors : (int * value_error) Nel.t
+      ; value : Repr.t
+      }
+  | Invalid_record of
+      { errors : record_error Nel.t
+      ; value : Repr.t
+      }
+  | Unexpected_value of
+      { value : Repr.t option
+      ; message : string
+      }
+
+and record_error =
+  | Invalid_field of
+      { field : string Nel.t
+      ; error : value_error
+      }
+  | Missing_field of string Nel.t
+  | Invalid_subrecord of value_error
+
+type 'a value = ('a, value_error) result
 type ('a, 'b) fn = 'a -> 'b value
 type 'a t = (Repr.t, 'a) fn
-type 'a record = ('a, Error.Check.for_record Nel.t) result
+type 'a record = ('a, record_error Nel.t) result
 
 module Infix = struct
   let ( <$> ) = Result.map
@@ -34,30 +61,51 @@ include Syntax
 
 let const x _ = Ok x
 
-let unexpected_kind kind expr =
-  expr |> Error.Check.unexpected_kind kind |> Result.error
+let raise_unexpected_kind expected value =
+  let given = Kind.infer value in
+  Unexpected_kind { given; expected; value } |> Result.error
 ;;
 
 let map_expected_kind expected =
   Result.map_error (function
-    | Error.Check.Unexpected_kind err ->
-      Error.Check.Unexpected_kind { err with expected }
+    | Unexpected_kind err -> Unexpected_kind { err with expected }
     | err -> err)
+;;
+
+let invalid_list value errors = Invalid_list { errors = Nel.rev errors; value }
+
+let invalid_record value errors =
+  Invalid_record { errors = Nel.rev errors; value }
+;;
+
+let missing_field ?(alt = []) field =
+  Nel.singleton @@ Missing_field Nel.(make field alt)
+;;
+
+let invalid_field ?(alt = []) field error =
+  Nel.singleton @@ Invalid_field { field = Nel.(make field alt); error }
+;;
+
+let invalid_subrecord err = Nel.singleton @@ Invalid_subrecord err
+let unexpected_value ?value message = Unexpected_value { value; message }
+
+let fail_with ?value message =
+  message |> unexpected_value ?value |> Result.error
 ;;
 
 let null = function
   | Repr.Null -> Ok ()
-  | x -> unexpected_kind Kind.null x
+  | x -> raise_unexpected_kind Kind.null x
 ;;
 
 let bool = function
   | Repr.Bool b -> Ok b
-  | x -> unexpected_kind Kind.bool x
+  | x -> raise_unexpected_kind Kind.bool x
 ;;
 
 let int = function
   | Repr.Int i -> Ok i
-  | x -> unexpected_kind Kind.int x
+  | x -> raise_unexpected_kind Kind.int x
 ;;
 
 let float = function
@@ -66,12 +114,12 @@ let float = function
     (* KLUDGE: Ugly trick because of the infamouse [number] type in
        JavaScript *)
     Ok (float_of_int i)
-  | x -> unexpected_kind Kind.float x
+  | x -> raise_unexpected_kind Kind.float x
 ;;
 
 let string = function
   | Repr.String s -> Ok s
-  | x -> unexpected_kind Kind.string x
+  | x -> raise_unexpected_kind Kind.string x
 ;;
 
 let list = function
@@ -79,7 +127,7 @@ let list = function
   | x ->
     (* NOTE: Since it can handle every repr, we probably do not want
        to build a complicated kind here. *)
-    unexpected_kind Kind.(list any) x
+    raise_unexpected_kind Kind.(list any) x
 ;;
 
 let list_of v = function
@@ -100,12 +148,11 @@ let list_of v = function
     in
     mapped_result
     |> Result.map List.rev
-    |> Result.map_error (fun errors ->
-      Error.Check.invalid_list value (Nel.rev errors))
+    |> Result.map_error (invalid_list value)
   | x ->
     (* NOTE: we cannot inspect the validator [v] here, so we lose the
        kind information. *)
-    unexpected_kind Kind.(list any) x
+    raise_unexpected_kind Kind.(list any) x
 ;;
 
 let option some = function
@@ -128,11 +175,11 @@ let k_sum_or_any constrs =
 
 let record v = function
   | Repr.Record fields as value ->
-    fields |> v |> Result.map_error (Error.Check.invalid_record value)
+    fields |> v |> Result.map_error (invalid_record value)
   | x ->
     (* NOTE: we cannot inspect the validator [v] here, so we lose the
        kind information for record classification. *)
-    unexpected_kind Kind.(record []) x
+    raise_unexpected_kind Kind.(record []) x
 ;;
 
 let opt ?(normalize_keys = true) ?(alt = []) fields key v =
@@ -149,7 +196,7 @@ let opt ?(normalize_keys = true) ?(alt = []) fields key v =
          value
          |> v
          |> Result.map Option.some
-         |> Result.map_error (Error.Check.invalid_field ~alt key))
+         |> Result.map_error (invalid_field ~alt key))
   in
   aux (key :: alt)
 ;;
@@ -157,9 +204,7 @@ let opt ?(normalize_keys = true) ?(alt = []) fields key v =
 let handle_null ~alt key v =
   (* HACK: We want to handle optional field inside requirement
      validation. *)
-  Repr.Null
-  |> v
-  |> Result.map_error (fun _ -> Error.Check.missing_field ~alt key)
+  Repr.Null |> v |> Result.map_error (fun _ -> missing_field ~alt key)
 ;;
 
 let req ?(normalize_keys = true) ?(alt = []) fields key v =
@@ -169,14 +214,13 @@ let req ?(normalize_keys = true) ?(alt = []) fields key v =
       (match Misc.find_assoc ~normalize_keys fields x with
        | None -> aux xs
        | Some Repr.Null -> handle_null ~alt key v
-       | Some value ->
-         value |> v |> Result.map_error (Error.Check.invalid_field ~alt key))
+       | Some value -> value |> v |> Result.map_error (invalid_field ~alt key))
   in
   aux (key :: alt)
 ;;
 
 let use_record fields v =
-  Repr.record fields |> v |> Result.map_error Error.Check.invalid_subrecord
+  Repr.record fields |> v |> Result.map_error invalid_subrecord
 ;;
 
 let rec sum constrs = function
@@ -186,7 +230,7 @@ let rec sum constrs = function
     constr
     |> Misc.find_assoc constrs
     |> Option.fold
-         ~none:(unexpected_kind (k_sum_or_any constrs) repr)
+         ~none:(raise_unexpected_kind (k_sum_or_any constrs) repr)
          ~some:(fun v -> v value)
   (* Deal with desugaring *)
   | Repr.String constr
@@ -198,7 +242,7 @@ let rec sum constrs = function
     sum constrs ((Repr.sum (fun () -> constr, v)) ())
   | repr ->
     (* Error handling *)
-    unexpected_kind (k_sum_or_any constrs) repr
+    raise_unexpected_kind (k_sum_or_any constrs) repr
 ;;
 
 let result ~ok ~error =
@@ -221,7 +265,7 @@ let rec pair fst snd = function
   | List [ a ] -> pair fst snd (Repr.pair Fun.id Repr.null (a, ()))
   | List [] ->
     pair fst snd Repr.(record [ "first", null (); "second", null () ])
-  | repr -> unexpected_kind Kind.(pair any any) repr
+  | repr -> raise_unexpected_kind Kind.(pair any any) repr
 ;;
 
 let rec triple f s t = function
@@ -237,15 +281,13 @@ let rec triple f s t = function
 ;;
 
 let where ?value ?(message = "Predicate not satisfied") predicate x =
-  if predicate x
-  then Ok x
-  else Error (Error.Check.unexpected_value ?value message)
+  if predicate x then Ok x else fail_with ?value message
 ;;
 
 let where_opt ?value ?(message = "Predicate not satisfied") predicate x =
   match predicate x with
   | Some x -> Ok x
-  | None -> Error (Error.Check.unexpected_value ?value message)
+  | None -> fail_with ?value message
 ;;
 
 let int32 = function
@@ -298,6 +340,6 @@ let char = function
   | Repr.String s when Int.equal (Stdlib.String.length s) 1 -> Ok s.[0]
   | Repr.Int i as repr ->
     (try Ok (Char.chr i) with
-     | _ -> Error (Error.Check.unexpected_value ~value:repr "char expected"))
-  | repr -> Error (Error.Check.unexpected_value ~value:repr "char expected")
+     | _ -> fail_with ~value:repr "char expected")
+  | repr -> fail_with ~value:repr "char expected"
 ;;

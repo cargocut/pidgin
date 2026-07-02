@@ -7,7 +7,7 @@ let kind = Alcotest.testable Pp.kind Kind.equal
 let repr = Alcotest.testable Pp.repr Repr.equal
 
 let checked ok =
-  let error = Alcotest.testable Pp.error_for_value Error.Check.equal in
+  let error = Alcotest.testable Pp.check_error Eq.check_error in
   Alcotest.result ok error
 ;;
 
