@@ -16,3 +16,9 @@ let sexp_parsed =
   and ok = Alcotest.testable Pp.sexp Sexp.equal in
   Alcotest.result ok error
 ;;
+
+let csexp_parsed =
+  let error = Alcotest.testable Pp.error_for_csexp_parsing Error.Csexp.equal
+  and ok = Alcotest.testable Pp.sexp Sexp.equal in
+  Alcotest.result ok error
+;;

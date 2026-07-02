@@ -17,6 +17,16 @@ type t = Sexp.t =
 (** Describe a parsed Canonical S-Expression. *)
 type parsed = (t, Error.Csexp.t) result
 
+(** {1 Parsing} *)
+
+(** [from_seq charseq] parse a sequence of chars ([charseq]) as
+    Canonical S-Expression. *)
+val from_seq : char Seq.t -> parsed
+
+(** [from_string string] parse a string as a Canonical
+    S-Expression. *)
+val from_string : string -> parsed
+
 (** {1 Conversion} *)
 
 (** [to_buffer buf csexp] output the given [csexp] into the given

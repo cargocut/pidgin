@@ -34,7 +34,7 @@ val node : t list -> t
     S-Expression. *)
 val from_seq : char Seq.t -> parsed
 
-(** [from_string string] parse a string as S-Expression. *)
+(** [from_string string] parse a string as a S-Expression. *)
 val from_string : string -> parsed
 
 (** {1 Conversion} *)

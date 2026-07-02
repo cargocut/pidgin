@@ -136,10 +136,47 @@ let error_for_value ppf err =
 let error_for_sexp_parsing_to_repr = function
   | Error.Sexp.Non_terminated_node pos ->
     Repr.(record [ "kind", string "non_terminated_node"; "position", int pos ])
+  | Error.Sexp.Non_opened_node pos ->
+    Repr.(record [ "kind", string "non_opened_node"; "position", int pos ])
 ;;
 
 let error_for_sexp_parsing ppf err =
   err |> error_for_sexp_parsing_to_repr |> Format.fprintf ppf "%a" repr
+;;
+
+let error_for_csexp_parsing_to_repr = function
+  | Error.Csexp.Non_terminated_node pos ->
+    Repr.(record [ "kind", string "non_terminated_node"; "position", int pos ])
+  | Error.Csexp.Premature_end_of_atom
+      { expected_length; given_length; position } ->
+    Repr.(
+      record
+        [ "kind", string "premature_end_of_atom"
+        ; "position", int position
+        ; "expected_length", int expected_length
+        ; "given_length", int given_length
+        ; "position", int position
+        ])
+  | Error.Csexp.Expected_atom pos ->
+    Repr.(record [ "kind", string "expected_atom"; "position", int pos ])
+  | Error.Csexp.Expected_number_or_column pos ->
+    Repr.(
+      record [ "kind", string "expected_number_or_column"; "position", int pos ])
+  | Error.Csexp.Expected_number pos ->
+    Repr.(record [ "kind", string "expected_number"; "position", int pos ])
+  | Error.Csexp.Unexpected_char (c, pos) ->
+    Repr.(
+      record
+        [ "kind", string "unexpected_char"
+        ; "position", int pos
+        ; "char", string (String.make 1 c)
+        ])
+  | Error.Csexp.Non_opened_node pos ->
+    Repr.(record [ "kind", string "non_opened_node"; "position", int pos ])
+;;
+
+let error_for_csexp_parsing ppf err =
+  err |> error_for_csexp_parsing_to_repr |> Format.fprintf ppf "%a" repr
 ;;
 
 let result ok error =
@@ -151,3 +188,4 @@ let result ok error =
 
 let checked_value ok = result ok error_for_value
 let sexp_parsed = result sexp error_for_sexp_parsing
+let csexp_parsed = result sexp error_for_csexp_parsing

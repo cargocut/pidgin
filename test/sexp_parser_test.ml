@@ -13,10 +13,18 @@ open struct
   let a = Sexp.atom
   let kv k v = n [ a k; v ]
 
+  let parse_empty =
+    test_case "Parse a simple atom" `Quick (fun () ->
+      let str = "" in
+      let expected = Ok (n [])
+      and computed = Sexp.from_string str in
+      check Test_lib.Testable.sexp_parsed "should be equal" expected computed)
+  ;;
+
   let parse_simple_atom =
     test_case "Parse a simple atom" `Quick (fun () ->
       let str = "foo" in
-      let expected = Ok (Sexp.atom "foo")
+      let expected = Ok (a "foo")
       and computed = Sexp.from_string str in
       check Test_lib.Testable.sexp_parsed "should be equal" expected computed)
   ;;
@@ -187,7 +195,7 @@ open struct
   let parse_invalid_expr0 =
     test_case "Parse an invalid expr" `Quick (fun () ->
       let str = "(foo" in
-      let expected = Error.Sexp.non_terminated_node 4
+      let expected = Error.Sexp.non_terminated_node 3
       and computed = Sexp.from_string str in
       check Test_lib.Testable.sexp_parsed "should be equal" expected computed)
   ;;
@@ -195,7 +203,7 @@ open struct
   let parse_invalid_expr1 =
     test_case "Parse an invalid expr" `Quick (fun () ->
       let str = "fo)o" in
-      let expected = Error.Sexp.non_terminated_node 2
+      let expected = Error.Sexp.non_opened_node 2
       and computed = Sexp.from_string str in
       check Test_lib.Testable.sexp_parsed "should be equal" expected computed)
   ;;
@@ -203,7 +211,7 @@ open struct
   let parse_invalid_expr2 =
     test_case "Parse an invalid expr" `Quick (fun () ->
       let str = "(((((((((((())))) ())))(())))())))" in
-      let expected = Error.Sexp.non_terminated_node 33
+      let expected = Error.Sexp.non_opened_node 33
       and computed = Sexp.from_string str in
       check Test_lib.Testable.sexp_parsed "should be equal" expected computed)
   ;;
@@ -219,7 +227,8 @@ end
 
 let cases =
   ( "Sexp (Parser)"
-  , [ parse_simple_atom
+  , [ parse_empty
+    ; parse_simple_atom
     ; parse_simple_node0
     ; parse_simple_node1
     ; parse_simple_node2

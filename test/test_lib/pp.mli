@@ -21,6 +21,9 @@ val error_for_value : Format.formatter -> Error.Check.for_value -> unit
 (** A pretty-printer for sexp_parsing. *)
 val error_for_sexp_parsing : Format.formatter -> Error.Sexp.t -> unit
 
+(** A pretty-printer for csexp_parsing. *)
+val error_for_csexp_parsing : Format.formatter -> Error.Csexp.t -> unit
+
 (** A pretty-printer for checked values. *)
 val checked_value
   :  (Format.formatter -> 'a -> unit)
@@ -30,3 +33,6 @@ val checked_value
 
 (** A pretty-printer for checked sexp. *)
 val sexp_parsed : Format.formatter -> Sexp.parsed -> unit
+
+(** A pretty-printer for checked csexp. *)
+val csexp_parsed : Format.formatter -> Csexp.parsed -> unit

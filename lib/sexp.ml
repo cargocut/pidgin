@@ -46,7 +46,7 @@ let parse_atom pos seq =
   let buf = Buffer.create 256 in
   let rec aux is_escaped pos seq =
     match Seq.uncons seq with
-    | None -> Buffer.contents buf, pos + 1, Seq.empty
+    | None -> Buffer.contents buf, pos, Seq.empty
     | Some ('\\', xs) when not is_escaped ->
       (* MAYBE: The YOCaml implementation doesn't seem to care about
          escape characters (if they are escaped). This appears to be a
@@ -71,7 +71,7 @@ let from_seq seq =
         (* NOTE: The expression is valid only if we haven't entered a
            node yet. Otherwise, it means the node hasn't been
            completed.*)
-        Error.Sexp.non_terminated_node pos
+        Error.Sexp.non_terminated_node (pos - 1)
     | Some (('\t' | ' ' | '\n'), xs) -> aux level (pos + 1) acc xs
     | Some (')', xs) ->
       (* MAYBE: The YOCaml implementation does not maintain the level
@@ -80,16 +80,18 @@ let from_seq seq =
          example: [foo)bar].*)
       if level > 0
       then Ok (List.rev acc, pos + 1, level - 1, xs)
-      else Error.Sexp.non_terminated_node pos
+      else Error.Sexp.non_opened_node pos
     | Some ('(', xs) ->
       Result.bind
-        (aux (level + 1) pos [] xs)
+        (aux (level + 1) (pos + 1) [] xs)
         (fun (n, pos, level, xs) ->
            (* NOTE: We go from the previous level (to avoid to
               maintain level decrement) *)
-           aux level (pos + 1) (node n :: acc) xs)
+           aux level pos (node n :: acc) xs)
     | Some (c, xs) ->
       let a, pos, xs = parse_atom pos (Seq.cons c xs) in
+      (* NOTE: We do not increase the position counter here because it
+         was already handled by [parse_atom]*)
       aux level pos (atom a :: acc) xs
   in
   Result.map
