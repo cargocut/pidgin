@@ -20,6 +20,14 @@ type t =
 (** Describe a parsed S-Expression. *)
 type parsed = (t, Error.sexp_parsing) result
 
+(** {1 Building} *)
+
+(** [atom x] create an atom. *)
+val atom : string -> t
+
+(** [node xs] create a node. *)
+val node : t list -> t
+
 (** {1 Parsing} *)
 
 (** [from_seq charseq] parse a sequence of chars ([charseq]) as

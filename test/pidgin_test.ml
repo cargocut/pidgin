@@ -17,5 +17,6 @@ let () =
     ; Check_composite_test.cases
     ; Check_product_test.cases
     ; Check_numeric_test.cases
+    ; Sexp_parser_test.cases
     ]
 ;;

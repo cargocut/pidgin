@@ -54,25 +54,31 @@ let parse_atom pos seq =
 
 let from_seq seq =
   let rec aux level pos acc seq =
-    (* MAYBE: The YOCaml implementation does not seem to preserve the
-       recursion level of a node, which seems clearly incorrect to me,
-       but the situation does not appear to have provided any
-       examples. *)
     match Seq.uncons seq with
     | None ->
       if Int.equal 0 level
-      then Ok (List.rev acc, level, pos, Seq.empty)
+      then Ok (List.rev acc, pos, level, Seq.empty)
       else
         (* NOTE: The expression is valid only if we haven't entered a
            node yet. Otherwise, it means the node hasn't been
            completed.*)
         Error (Error.non_terminated_node pos)
     | Some (('\t' | ' ' | '\n'), xs) -> aux level (pos + 1) acc xs
-    | Some (')', xs) -> Ok (List.rev acc, level, pos + 1, xs)
+    | Some (')', xs) ->
+      (* MAYBE: The YOCaml implementation does not maintain the level
+         counter and relies solely on recursion, which makes it
+         impossible to detect closed cases without an opening, for
+         example: [foo)bar].*)
+      if level > 0
+      then Ok (List.rev acc, pos + 1, level - 1, xs)
+      else Error (Error.non_terminated_node pos)
     | Some ('(', xs) ->
       Result.bind
         (aux (level + 1) pos [] xs)
-        (fun (n, level, pos, xs) -> aux level (pos + 1) (node n :: acc) xs)
+        (fun (n, pos, level, xs) ->
+           (* NOTE: We go from the previous level (to avoid to
+              maintain level decrement) *)
+           aux level (pos + 1) (node n :: acc) xs)
     | Some (c, xs) ->
       let a, pos, xs = parse_atom pos (Seq.cons c xs) in
       aux level pos (atom a :: acc) xs
