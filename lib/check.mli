@@ -165,6 +165,12 @@ val req
     reusability in record validators). *)
 val use_record : (string * Repr.t) list -> 'a t -> 'a record
 
+(** {1 Error propagation} *)
+
+(** [fail_with ?repr message] fails validation with a given
+    [message]. *)
+val fail_with : ?value:Repr.t -> string -> ('a, value_error) result
+
 (** {1 Infix operators} *)
 
 module Infix : sig
