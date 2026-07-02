@@ -19,7 +19,10 @@ open struct
   let null1 =
     test_case "null" `Quick (fun () ->
       let repr = Repr.int 65 in
-      let expected = Error (Error.Check.unexpected_kind Kind.null repr)
+      let expected =
+        Error
+          (Check.Unexpected_kind
+             { expected = Kind.null; value = repr; given = Kind.int })
       and computed = repr |> Check.null in
       check (Test_lib.Testable.checked unit) "should be equal" expected computed)
   ;;
@@ -43,7 +46,10 @@ open struct
   let bool2 =
     test_case "bool" `Quick (fun () ->
       let repr = Repr.int 65 in
-      let expected = Error (Error.Check.unexpected_kind Kind.bool repr)
+      let expected =
+        Error
+          (Check.Unexpected_kind
+             { expected = Kind.bool; value = repr; given = Kind.int })
       and computed = repr |> Check.bool in
       check (Test_lib.Testable.checked bool) "should be equal" expected computed)
   ;;
@@ -67,7 +73,10 @@ open struct
   let int2 =
     test_case "int" `Quick (fun () ->
       let repr = Repr.(list_of int) [ 65 ] in
-      let expected = Error (Error.Check.unexpected_kind Kind.int repr)
+      let expected =
+        Error
+          (Check.Unexpected_kind
+             { expected = Kind.int; value = repr; given = Kind.(list int) })
       and computed = repr |> Check.int in
       check (Test_lib.Testable.checked int) "should be equal" expected computed)
   ;;
@@ -99,7 +108,10 @@ open struct
   let float2 =
     test_case "float" `Quick (fun () ->
       let repr = Repr.(list_of float) [ 65.76 ] in
-      let expected = Error (Error.Check.unexpected_kind Kind.float repr)
+      let expected =
+        Error
+          (Check.Unexpected_kind
+             { expected = Kind.float; value = repr; given = Kind.(list float) })
       and computed = repr |> Check.float in
       check
         (Test_lib.Testable.checked (float 0.0))
@@ -135,7 +147,10 @@ open struct
   let string2 =
     test_case "string" `Quick (fun () ->
       let repr = Repr.int 33 in
-      let expected = Error (Error.Check.unexpected_kind Kind.string repr)
+      let expected =
+        Error
+          (Check.Unexpected_kind
+             { expected = Kind.string; value = repr; given = Kind.int })
       and computed = repr |> Check.string in
       check
         (Test_lib.Testable.checked string)
@@ -164,7 +179,9 @@ open struct
     test_case "char" `Quick (fun () ->
       let repr = Repr.string "Hello World" in
       let expected =
-        Error (Error.Check.unexpected_value ~value:repr "char expected")
+        Error
+          (Check.Unexpected_value
+             { value = Some repr; message = "char expected" })
       and computed = repr |> Check.char in
       check (Test_lib.Testable.checked char) "should be equal" expected computed)
   ;;

@@ -74,7 +74,9 @@ open struct
     test_case "from_string" `Quick (fun () ->
       let str = "6:foo" in
       let expected =
-        Error.Csexp.premature_end_of_atom ~expected_length:6 ~given_length:3 4
+        Error
+          (Csexp.Premature_end_of_atom
+             { expected_length = 6; given_length = 3; position = 4 })
       and computed = Csexp.from_string str in
       check Test_lib.Testable.csexp_parsed "should be equal" expected computed)
   ;;
@@ -82,7 +84,7 @@ open struct
   let parse_invalid1 =
     test_case "from_string" `Quick (fun () ->
       let str = "(3:foo))" in
-      let expected = Error.Csexp.non_opened_node 7
+      let expected = Error (Csexp.Non_opened_node 7)
       and computed = Csexp.from_string str in
       check Test_lib.Testable.csexp_parsed "should be equal" expected computed)
   ;;
@@ -90,7 +92,7 @@ open struct
   let parse_invalid2 =
     test_case "from_string" `Quick (fun () ->
       let str = "((3:foo)" in
-      let expected = Error.Csexp.non_terminated_node 7
+      let expected = Error (Csexp.Non_terminated_node 7)
       and computed = Csexp.from_string str in
       check Test_lib.Testable.csexp_parsed "should be equal" expected computed)
   ;;

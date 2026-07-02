@@ -7,7 +7,20 @@ type t = Sexp.t =
   | Atom of string
   | Node of t list
 
-type parsed = (t, Error.Csexp.t) result
+type parsing_error =
+  | Premature_end_of_atom of
+      { expected_length : int
+      ; given_length : int
+      ; position : int
+      }
+  | Expected_atom of int
+  | Expected_number_or_column of int
+  | Expected_number of int
+  | Unexpected_char of char * int
+  | Non_terminated_node of int
+  | Non_opened_node of int
+
+type parsed = (t, parsing_error) result
 
 let equal = Sexp.equal
 
@@ -31,6 +44,12 @@ let to_string sexp =
   Buffer.contents buf
 ;;
 
+let premature_end_of_atom ~given_length ~expected_length ~pos =
+  Premature_end_of_atom
+    { given_length; expected_length; position = pos + given_length - 1 }
+  |> Result.error
+;;
+
 let collect_string pos expected_length seq =
   let buf = Buffer.create expected_length in
   let rec aux given_length seq =
@@ -43,11 +62,7 @@ let collect_string pos expected_length seq =
       | Some (c, xs) ->
         Buffer.add_char buf c;
         aux (given_length + 1) xs
-      | None ->
-        Error.Csexp.premature_end_of_atom
-          ~given_length
-          ~expected_length
-          (pos + given_length - 1))
+      | None -> premature_end_of_atom ~given_length ~expected_length ~pos)
   in
   aux 0 seq
 ;;
@@ -57,7 +72,7 @@ let char_to_int c = int_of_char c - int_of_char '0'
 let parse_atom pos seq =
   let rec aux acc pos seq =
     match Seq.uncons seq, acc with
-    | None, _ -> Error.Csexp.expected_atom pos
+    | None, _ -> Error (Expected_atom pos)
     | Some (':', xs), Some len ->
       Result.map
         (fun (atom, xs) -> atom, pos + len, xs)
@@ -67,9 +82,9 @@ let parse_atom pos seq =
       aux (Some (acc + char_to_int i)) (pos + 1) xs
     | Some _, Some _ ->
       (* NOTE: Regular character before [:] *)
-      Error.Csexp.expected_number_or_column pos
+      Error (Expected_number_or_column pos)
       (* NOTE: Regular character without any number *)
-    | Some _, None -> Error.Csexp.expected_number pos
+    | Some _, None -> Error (Expected_number pos)
   in
   aux None pos seq
 ;;
@@ -84,7 +99,7 @@ let from_seq seq =
         (* NOTE: The expression is valid only if we haven't entered a
            node yet. Otherwise, it means the node hasn't been
            completed.*)
-        Error.Csexp.non_terminated_node (pos - 1)
+        Error (Non_terminated_node (pos - 1))
     | Some (('0' .. '9' as c), xs) ->
       Result.bind
         (parse_atom pos (Seq.cons c xs))
@@ -96,7 +111,7 @@ let from_seq seq =
          example: [foo)bar].*)
       if level > 0
       then Ok (List.rev acc, pos + 1, level - 1, xs)
-      else Error.Csexp.non_opened_node pos
+      else Error (Non_opened_node pos)
     | Some ('(', xs) ->
       Result.bind
         (aux (level + 1) (pos + 1) [] xs)

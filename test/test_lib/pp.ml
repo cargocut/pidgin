@@ -75,8 +75,8 @@ let field_with_alt Nel.(field :: alt) =
   | _ -> Repr.(record [ "main", string field; "other", list_of string alt ])
 ;;
 
-let rec error_for_value_to_repr = function
-  | Error.Check.Unexpected_kind { expected; given; value } ->
+let rec check_error_to_repr = function
+  | Check.Unexpected_kind { expected; given; value } ->
     Repr.(
       record
         [ "kind", string "unexpected_kind"
@@ -84,7 +84,7 @@ let rec error_for_value_to_repr = function
         ; "expected", string @@ Format.asprintf "%a" kind expected
         ; "given", string @@ Format.asprintf "%a" kind given
         ])
-  | Error.Check.Invalid_list { errors; value } ->
+  | Check.Invalid_list { errors; value } ->
     Repr.(
       record
         [ "kind", string "invalid_list"
@@ -92,17 +92,17 @@ let rec error_for_value_to_repr = function
         ; ( "errors"
           , list_of
               (fun (i, error) ->
-                 record [ "at", int i; "error", error_for_value_to_repr error ])
+                 record [ "at", int i; "error", check_error_to_repr error ])
               (Nel.to_list errors) )
         ])
-  | Error.Check.Invalid_record { errors; value } ->
+  | Check.Invalid_record { errors; value } ->
     Repr.(
       record
         [ "kind", string "invalid_record"
         ; "value", value
-        ; "errors", list_of error_for_record_to_repr (Nel.to_list errors)
+        ; "errors", list_of check_record_error_to_repr (Nel.to_list errors)
         ])
-  | Error.Check.Unexpected_value { value; message } ->
+  | Check.Unexpected_value { value; message } ->
     Repr.(
       record
         [ "kind", string "unexpected_value"
@@ -110,45 +110,44 @@ let rec error_for_value_to_repr = function
         ; "value", option Fun.id value
         ])
 
-and error_for_record_to_repr = function
-  | Error.Check.Missing_field field ->
+and check_record_error_to_repr = function
+  | Check.Missing_field field ->
     Repr.(
       record [ "kind", string "missing_field"; "field", field_with_alt field ])
-  | Error.Check.Invalid_subrecord err ->
+  | Check.Invalid_subrecord err ->
     Repr.(
       record
         [ "kind", string "invalid_subrecord"
-        ; "errors", error_for_value_to_repr err
+        ; "errors", check_error_to_repr err
         ])
-  | Error.Check.Invalid_field { field; error } ->
+  | Check.Invalid_field { field; error } ->
     Repr.(
       record
         [ "kind", string "invalid_field"
         ; "field", field_with_alt field
-        ; "error", error_for_value_to_repr error
+        ; "error", check_error_to_repr error
         ])
 ;;
 
-let error_for_value ppf err =
-  err |> error_for_value_to_repr |> Format.fprintf ppf "%a" repr
+let check_error ppf err =
+  err |> check_error_to_repr |> Format.fprintf ppf "%a" repr
 ;;
 
-let error_for_sexp_parsing_to_repr = function
-  | Error.Sexp.Non_terminated_node pos ->
+let sexp_parsing_error_to_repr = function
+  | Sexp.Non_terminated_node pos ->
     Repr.(record [ "kind", string "non_terminated_node"; "position", int pos ])
-  | Error.Sexp.Non_opened_node pos ->
+  | Sexp.Non_opened_node pos ->
     Repr.(record [ "kind", string "non_opened_node"; "position", int pos ])
 ;;
 
-let error_for_sexp_parsing ppf err =
-  err |> error_for_sexp_parsing_to_repr |> Format.fprintf ppf "%a" repr
+let sexp_parsing_error ppf err =
+  err |> sexp_parsing_error_to_repr |> Format.fprintf ppf "%a" repr
 ;;
 
-let error_for_csexp_parsing_to_repr = function
-  | Error.Csexp.Non_terminated_node pos ->
+let csexp_parsing_error_to_repr = function
+  | Csexp.Non_terminated_node pos ->
     Repr.(record [ "kind", string "non_terminated_node"; "position", int pos ])
-  | Error.Csexp.Premature_end_of_atom
-      { expected_length; given_length; position } ->
+  | Csexp.Premature_end_of_atom { expected_length; given_length; position } ->
     Repr.(
       record
         [ "kind", string "premature_end_of_atom"
@@ -157,26 +156,26 @@ let error_for_csexp_parsing_to_repr = function
         ; "given_length", int given_length
         ; "position", int position
         ])
-  | Error.Csexp.Expected_atom pos ->
+  | Csexp.Expected_atom pos ->
     Repr.(record [ "kind", string "expected_atom"; "position", int pos ])
-  | Error.Csexp.Expected_number_or_column pos ->
+  | Csexp.Expected_number_or_column pos ->
     Repr.(
       record [ "kind", string "expected_number_or_column"; "position", int pos ])
-  | Error.Csexp.Expected_number pos ->
+  | Csexp.Expected_number pos ->
     Repr.(record [ "kind", string "expected_number"; "position", int pos ])
-  | Error.Csexp.Unexpected_char (c, pos) ->
+  | Csexp.Unexpected_char (c, pos) ->
     Repr.(
       record
         [ "kind", string "unexpected_char"
         ; "position", int pos
         ; "char", string (String.make 1 c)
         ])
-  | Error.Csexp.Non_opened_node pos ->
+  | Csexp.Non_opened_node pos ->
     Repr.(record [ "kind", string "non_opened_node"; "position", int pos ])
 ;;
 
-let error_for_csexp_parsing ppf err =
-  err |> error_for_csexp_parsing_to_repr |> Format.fprintf ppf "%a" repr
+let csexp_parsing_error ppf err =
+  err |> csexp_parsing_error_to_repr |> Format.fprintf ppf "%a" repr
 ;;
 
 let result ok error =
@@ -186,6 +185,6 @@ let result ok error =
     ~error:(fun ppf x -> fprintf ppf "Error @[<hov 1>%a@]" error x)
 ;;
 
-let checked_value ok = result ok error_for_value
-let sexp_parsed = result sexp error_for_sexp_parsing
-let csexp_parsed = result sexp error_for_csexp_parsing
+let checked_value ok = result ok check_error
+let sexp_parsed = result sexp sexp_parsing_error
+let csexp_parsed = result sexp csexp_parsing_error

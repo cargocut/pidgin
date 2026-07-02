@@ -16,13 +16,13 @@ val kind : Format.formatter -> Kind.t -> unit
 val sexp : Format.formatter -> Sexp.t -> unit
 
 (** A pretty-printer for value_error. *)
-val error_for_value : Format.formatter -> Error.Check.for_value -> unit
+val check_error : Format.formatter -> Check.value_error -> unit
 
 (** A pretty-printer for sexp_parsing. *)
-val error_for_sexp_parsing : Format.formatter -> Error.Sexp.t -> unit
+val sexp_parsing_error : Format.formatter -> Sexp.parsing_error -> unit
 
 (** A pretty-printer for csexp_parsing. *)
-val error_for_csexp_parsing : Format.formatter -> Error.Csexp.t -> unit
+val csexp_parsing_error : Format.formatter -> Csexp.parsing_error -> unit
 
 (** A pretty-printer for checked values. *)
 val checked_value

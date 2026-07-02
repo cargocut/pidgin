@@ -195,7 +195,7 @@ open struct
   let parse_invalid_expr0 =
     test_case "Parse an invalid expr" `Quick (fun () ->
       let str = "(foo" in
-      let expected = Error.Sexp.non_terminated_node 3
+      let expected = Sexp.Non_terminated_node 3 |> Result.error
       and computed = Sexp.from_string str in
       check Test_lib.Testable.sexp_parsed "should be equal" expected computed)
   ;;
@@ -203,7 +203,7 @@ open struct
   let parse_invalid_expr1 =
     test_case "Parse an invalid expr" `Quick (fun () ->
       let str = "fo)o" in
-      let expected = Error.Sexp.non_opened_node 2
+      let expected = Sexp.Non_opened_node 2 |> Result.error
       and computed = Sexp.from_string str in
       check Test_lib.Testable.sexp_parsed "should be equal" expected computed)
   ;;
@@ -211,7 +211,7 @@ open struct
   let parse_invalid_expr2 =
     test_case "Parse an invalid expr" `Quick (fun () ->
       let str = "(((((((((((())))) ())))(())))())))" in
-      let expected = Error.Sexp.non_opened_node 33
+      let expected = Sexp.Non_opened_node 33 |> Result.error
       and computed = Sexp.from_string str in
       check Test_lib.Testable.sexp_parsed "should be equal" expected computed)
   ;;
@@ -219,7 +219,7 @@ open struct
   let parse_invalid_expr3 =
     test_case "Parse an invalid expr" `Quick (fun () ->
       let str = "(foo bar (baz)" in
-      let expected = Error.Sexp.non_terminated_node 13
+      let expected = Sexp.Non_terminated_node 13 |> Result.error
       and computed = Sexp.from_string str in
       check Test_lib.Testable.sexp_parsed "should be equal" expected computed)
   ;;

@@ -16,7 +16,11 @@ type t =
   | Atom of string
   | Node of t list
 
-type parsed = (t, Error.Sexp.t) result
+type parsing_error =
+  | Non_terminated_node of int
+  | Non_opened_node of int
+
+type parsed = (t, parsing_error) result
 
 let atom x = Atom x
 let node x = Node x
@@ -71,7 +75,7 @@ let from_seq seq =
         (* NOTE: The expression is valid only if we haven't entered a
            node yet. Otherwise, it means the node hasn't been
            completed.*)
-        Error.Sexp.non_terminated_node (pos - 1)
+        Error (Non_terminated_node (pos - 1))
     | Some (('\t' | ' ' | '\n'), xs) -> aux level (pos + 1) acc xs
     | Some (')', xs) ->
       (* MAYBE: The YOCaml implementation does not maintain the level
@@ -80,7 +84,7 @@ let from_seq seq =
          example: [foo)bar].*)
       if level > 0
       then Ok (List.rev acc, pos + 1, level - 1, xs)
-      else Error.Sexp.non_opened_node pos
+      else Error (Non_opened_node pos)
     | Some ('(', xs) ->
       Result.bind
         (aux (level + 1) (pos + 1) [] xs)

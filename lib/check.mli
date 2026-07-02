@@ -8,11 +8,53 @@
 
 (** {1 Types} *)
 
+(** {2 Errors}
+
+    Errors are divided into several distinct categories:
+
+    - Validation errors for {b values}: all errors that may occur
+      when attempting to validate arbitrary data.
+
+    - Validation error for {b records}: all errors that may occur
+      when attempting to validate a record (including value errors). *)
+
+(** Describes all the errors that can occur when validating arbitrary
+    data from the {!type:Repr.t} format. *)
+type value_error =
+  | Unexpected_kind of
+      { expected : Kind.t
+      ; given : Kind.t
+      ; value : Repr.t
+      }
+  | Invalid_list of
+      { errors : (int * value_error) Nel.t
+      ; value : Repr.t
+      }
+  | Invalid_record of
+      { errors : record_error Nel.t
+      ; value : Repr.t
+      }
+  | Unexpected_value of
+      { value : Repr.t option
+      ; message : string
+      }
+
+(** Errors for record. *)
+and record_error =
+  | Invalid_field of
+      { field : string Nel.t
+      ; error : value_error
+      }
+  | Missing_field of string Nel.t
+  | Invalid_subrecord of value_error
+
+(** {2 Shortcuts} *)
+
 (** A type describing a value that has been validated. *)
-type 'a value = ('a, Error.Check.for_value) result
+type 'a value = ('a, value_error) result
 
 (** A type describing a record that has been validated. *)
-type 'a record = ('a, Error.Check.for_record Nel.t) result
+type 'a record = ('a, record_error Nel.t) result
 
 (** A type describing a function that perform validation (a check). *)
 type ('a, 'b) fn = 'a -> 'b value
@@ -122,6 +164,12 @@ val req
     validator in a validation pipeline for another record (enables
     reusability in record validators). *)
 val use_record : (string * Repr.t) list -> 'a t -> 'a record
+
+(** {1 Error propagation} *)
+
+(** [fail_with ?repr message] fails validation with a given
+    [message]. *)
+val fail_with : ?value:Repr.t -> string -> ('a, value_error) result
 
 (** {1 Infix operators} *)
 

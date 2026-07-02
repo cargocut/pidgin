@@ -17,8 +17,13 @@ type t =
   | Atom of string
   | Node of t list
 
+(** Errors that may occur during parsing. *)
+type parsing_error =
+  | Non_terminated_node of int
+  | Non_opened_node of int
+
 (** Describe a parsed S-Expression. *)
-type parsed = (t, Error.Sexp.t) result
+type parsed = (t, parsing_error) result
 
 (** {1 Building} *)
 
