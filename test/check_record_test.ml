@@ -30,11 +30,11 @@ open struct
     test_case "human" `Quick (fun () ->
       let repr = Repr.record [] in
       let expected =
-        Error.invalid_record
+        Error.Check.invalid_record
           repr
           (Nel.append
-             (Error.missing_field ~alt:[ "nick"; "pseudo" ] "nickname")
-             (Error.missing_field "gender"))
+             (Error.Check.missing_field ~alt:[ "nick"; "pseudo" ] "nickname")
+             (Error.Check.missing_field "gender"))
         |> Result.error
       and computed = repr |> Human.from_pidgin in
       check
@@ -86,12 +86,12 @@ open struct
           ]
       in
       let expected =
-        Error.invalid_record
+        Error.Check.invalid_record
           repr
           (Nel.append
-             (Error.missing_field ~alt:[ "nick"; "pseudo" ] "nickname")
-             (Error.invalid_field "age"
-              @@ Error.unexpected_kind Kind.int (Repr.string "trente")))
+             (Error.Check.missing_field ~alt:[ "nick"; "pseudo" ] "nickname")
+             (Error.Check.invalid_field "age"
+              @@ Error.Check.unexpected_kind Kind.int (Repr.string "trente")))
         |> Result.error
       and computed = repr |> Human.from_pidgin in
       check
@@ -210,12 +210,14 @@ open struct
           ]
       in
       let expected =
-        Error.invalid_record
+        Error.Check.invalid_record
           repr
           (Nel.append
-             (Error.invalid_subrecord
-                (Error.invalid_record repr (Error.missing_field "gender")))
-             (Error.missing_field ~alt:[ "mail" ] "email"))
+             (Error.Check.invalid_subrecord
+                (Error.Check.invalid_record
+                   repr
+                   (Error.Check.missing_field "gender")))
+             (Error.Check.missing_field ~alt:[ "mail" ] "email"))
         |> Result.error
       and computed = repr |> User.from_pidgin in
       check

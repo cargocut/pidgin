@@ -18,7 +18,7 @@ type t =
   | Node of t list
 
 (** Describe a parsed S-Expression. *)
-type parsed = (t, Error.sexp_parsing) result
+type parsed = (t, Error.Sexp.t) result
 
 (** {1 Building} *)
 
@@ -38,6 +38,10 @@ val from_seq : char Seq.t -> parsed
 val from_string : string -> parsed
 
 (** {1 Conversion} *)
+
+(** [to_buffer buf sexp] output the given [sexp] into the given
+    [buffer]. *)
+val to_buffer : Buffer.t -> t -> unit
 
 (** [to_string sexp] render a given [sexp] as a [string]. Note that
     the function does not perform pretty-printing. *)

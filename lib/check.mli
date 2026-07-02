@@ -9,10 +9,10 @@
 (** {1 Types} *)
 
 (** A type describing a value that has been validated. *)
-type 'a value = ('a, Error.for_value) result
+type 'a value = ('a, Error.Check.for_value) result
 
 (** A type describing a record that has been validated. *)
-type 'a record = ('a, Error.for_record Nel.t) result
+type 'a record = ('a, Error.Check.for_record Nel.t) result
 
 (** A type describing a function that perform validation (a check). *)
 type ('a, 'b) fn = 'a -> 'b value

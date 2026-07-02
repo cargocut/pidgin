@@ -42,7 +42,7 @@ open struct
       and v = Check.(result ~ok:int ~error:string) in
       let expected =
         Error
-          (Error.unexpected_kind
+          (Error.Check.unexpected_kind
              Nel.(Kind.(sum (("ok", any) :: [ "error", any ])))
              repr)
       and computed = v repr in
@@ -91,7 +91,10 @@ open struct
       let repr = Repr.(result ~ok:int ~error:string) (Ok 10)
       and v = Check.(sum []) in
       let expected =
-        Error (Error.unexpected_kind (Kind.record [ "absurd", Kind.any ]) repr)
+        Error
+          (Error.Check.unexpected_kind
+             (Kind.record [ "absurd", Kind.any ])
+             repr)
       and computed = v repr in
       check
         (Test_lib.Testable.checked (result int string))

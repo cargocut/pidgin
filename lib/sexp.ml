@@ -16,7 +16,7 @@ type t =
   | Atom of string
   | Node of t list
 
-type parsed = (t, Error.sexp_parsing) result
+type parsed = (t, Error.Sexp.t) result
 
 let atom x = Atom x
 let node x = Node x
@@ -28,9 +28,18 @@ let rec equal a b =
   | Atom _, _ | Node _, _ -> false
 ;;
 
-let rec to_string = function
-  | Atom s -> Misc.escape_spaces s
-  | Node x -> "(" ^ Misc.concat_with ~sep:" " to_string x ^ ")"
+let rec to_buffer buf = function
+  | Atom s -> Buffer.add_string buf (Misc.escape_spaces s)
+  | Node x ->
+    Buffer.add_char buf '(';
+    Misc.concat_buffer_with ~sep:" " buf to_buffer x;
+    Buffer.add_char buf ')'
+;;
+
+let to_string sexp =
+  let buf = Buffer.create 256 in
+  to_buffer buf sexp;
+  Buffer.contents buf
 ;;
 
 let parse_atom pos seq =
@@ -62,7 +71,7 @@ let from_seq seq =
         (* NOTE: The expression is valid only if we haven't entered a
            node yet. Otherwise, it means the node hasn't been
            completed.*)
-        Error (Error.non_terminated_node pos)
+        Error.Sexp.non_terminated_node pos
     | Some (('\t' | ' ' | '\n'), xs) -> aux level (pos + 1) acc xs
     | Some (')', xs) ->
       (* MAYBE: The YOCaml implementation does not maintain the level
@@ -71,7 +80,7 @@ let from_seq seq =
          example: [foo)bar].*)
       if level > 0
       then Ok (List.rev acc, pos + 1, level - 1, xs)
-      else Error (Error.non_terminated_node pos)
+      else Error.Sexp.non_terminated_node pos
     | Some ('(', xs) ->
       Result.bind
         (aux (level + 1) pos [] xs)

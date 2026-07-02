@@ -3,10 +3,10 @@
 
    SPDX-License-Identifier: BSD-3-Clause *)
 
-type 'a value = ('a, Error.for_value) result
+type 'a value = ('a, Error.Check.for_value) result
 type ('a, 'b) fn = 'a -> 'b value
 type 'a t = (Repr.t, 'a) fn
-type 'a record = ('a, Error.for_record Nel.t) result
+type 'a record = ('a, Error.Check.for_record Nel.t) result
 
 module Infix = struct
   let ( <$> ) = Result.map
@@ -35,12 +35,13 @@ include Syntax
 let const x _ = Ok x
 
 let unexpected_kind kind expr =
-  expr |> Error.unexpected_kind kind |> Result.error
+  expr |> Error.Check.unexpected_kind kind |> Result.error
 ;;
 
 let map_expected_kind expected =
   Result.map_error (function
-    | Error.Unexpected_kind err -> Error.Unexpected_kind { err with expected }
+    | Error.Check.Unexpected_kind err ->
+      Error.Check.Unexpected_kind { err with expected }
     | err -> err)
 ;;
 
@@ -100,7 +101,7 @@ let list_of v = function
     mapped_result
     |> Result.map List.rev
     |> Result.map_error (fun errors ->
-      Error.invalid_list value (Nel.rev errors))
+      Error.Check.invalid_list value (Nel.rev errors))
   | x ->
     (* NOTE: we cannot inspect the validator [v] here, so we lose the
        kind information. *)
@@ -127,7 +128,7 @@ let k_sum_or_any constrs =
 
 let record v = function
   | Repr.Record fields as value ->
-    fields |> v |> Result.map_error (Error.invalid_record value)
+    fields |> v |> Result.map_error (Error.Check.invalid_record value)
   | x ->
     (* NOTE: we cannot inspect the validator [v] here, so we lose the
        kind information for record classification. *)
@@ -148,7 +149,7 @@ let opt ?(normalize_keys = true) ?(alt = []) fields key v =
          value
          |> v
          |> Result.map Option.some
-         |> Result.map_error (Error.invalid_field ~alt key))
+         |> Result.map_error (Error.Check.invalid_field ~alt key))
   in
   aux (key :: alt)
 ;;
@@ -156,7 +157,9 @@ let opt ?(normalize_keys = true) ?(alt = []) fields key v =
 let handle_null ~alt key v =
   (* HACK: We want to handle optional field inside requirement
      validation. *)
-  Repr.Null |> v |> Result.map_error (fun _ -> Error.missing_field ~alt key)
+  Repr.Null
+  |> v
+  |> Result.map_error (fun _ -> Error.Check.missing_field ~alt key)
 ;;
 
 let req ?(normalize_keys = true) ?(alt = []) fields key v =
@@ -167,13 +170,13 @@ let req ?(normalize_keys = true) ?(alt = []) fields key v =
        | None -> aux xs
        | Some Repr.Null -> handle_null ~alt key v
        | Some value ->
-         value |> v |> Result.map_error (Error.invalid_field ~alt key))
+         value |> v |> Result.map_error (Error.Check.invalid_field ~alt key))
   in
   aux (key :: alt)
 ;;
 
 let use_record fields v =
-  Repr.record fields |> v |> Result.map_error Error.invalid_subrecord
+  Repr.record fields |> v |> Result.map_error Error.Check.invalid_subrecord
 ;;
 
 let rec sum constrs = function
@@ -234,13 +237,15 @@ let rec triple f s t = function
 ;;
 
 let where ?value ?(message = "Predicate not satisfied") predicate x =
-  if predicate x then Ok x else Error (Error.unexpected_value ?value message)
+  if predicate x
+  then Ok x
+  else Error (Error.Check.unexpected_value ?value message)
 ;;
 
 let where_opt ?value ?(message = "Predicate not satisfied") predicate x =
   match predicate x with
   | Some x -> Ok x
-  | None -> Error (Error.unexpected_value ?value message)
+  | None -> Error (Error.Check.unexpected_value ?value message)
 ;;
 
 let int32 = function
@@ -293,6 +298,6 @@ let char = function
   | Repr.String s when Int.equal (Stdlib.String.length s) 1 -> Ok s.[0]
   | Repr.Int i as repr ->
     (try Ok (Char.chr i) with
-     | _ -> Error (Error.unexpected_value ~value:repr "char expected"))
-  | repr -> Error (Error.unexpected_value ~value:repr "char expected")
+     | _ -> Error (Error.Check.unexpected_value ~value:repr "char expected"))
+  | repr -> Error (Error.Check.unexpected_value ~value:repr "char expected")
 ;;

@@ -35,7 +35,7 @@ open struct
       let repr = Repr.string "foo" in
       let expected =
         Error
-          (Error.unexpected_kind
+          (Error.Check.unexpected_kind
              Kind.(or_ int (branch "int32" string))
              Repr.(sum (fun () -> "foo", null ()) ()))
       and computed = Check.int32 repr in
@@ -84,7 +84,7 @@ open struct
       let repr = Repr.string "foo" in
       let expected =
         Error
-          (Error.unexpected_kind
+          (Error.Check.unexpected_kind
              Kind.(
                or_ int (or_ (branch "int64" string) (branch "int32" string)))
              Repr.(sum (fun () -> "foo", null ()) ()))
@@ -99,7 +99,8 @@ open struct
   let int64_from_lookalike_64 =
     test_case "int64 from a look a like int64" `Quick (fun () ->
       let repr = Repr.sum (fun () -> "int64", Repr.string "foo bar baz") () in
-      let expected = Error (Error.unexpected_value ~value:repr "int64 expected")
+      let expected =
+        Error (Error.Check.unexpected_value ~value:repr "int64 expected")
       and computed = Check.int64 repr in
       check
         (Test_lib.Testable.checked int64)

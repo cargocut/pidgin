@@ -93,7 +93,7 @@ open struct
         Repr.List [ Int 42; String "Hello World"; Bool true; String "Hello" ]
       and v = Check.(triple int string (option bool)) in
       let expected =
-        Error (Error.unexpected_kind Kind.(pair any (pair any any)) repr)
+        Error (Error.Check.unexpected_kind Kind.(pair any (pair any any)) repr)
       and computed = v repr in
       check
         (Test_lib.Testable.checked (triple int string (option bool)))

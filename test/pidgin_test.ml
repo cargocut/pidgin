@@ -18,5 +18,6 @@ let () =
     ; Check_product_test.cases
     ; Check_numeric_test.cases
     ; Sexp_parser_test.cases
+    ; Csexp_to_string_test.cases
     ]
 ;;

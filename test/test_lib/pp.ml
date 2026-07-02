@@ -76,7 +76,7 @@ let field_with_alt Nel.(field :: alt) =
 ;;
 
 let rec error_for_value_to_repr = function
-  | Error.Unexpected_kind { expected; given; value } ->
+  | Error.Check.Unexpected_kind { expected; given; value } ->
     Repr.(
       record
         [ "kind", string "unexpected_kind"
@@ -84,7 +84,7 @@ let rec error_for_value_to_repr = function
         ; "expected", string @@ Format.asprintf "%a" kind expected
         ; "given", string @@ Format.asprintf "%a" kind given
         ])
-  | Error.Invalid_list { errors; value } ->
+  | Error.Check.Invalid_list { errors; value } ->
     Repr.(
       record
         [ "kind", string "invalid_list"
@@ -95,14 +95,14 @@ let rec error_for_value_to_repr = function
                  record [ "at", int i; "error", error_for_value_to_repr error ])
               (Nel.to_list errors) )
         ])
-  | Error.Invalid_record { errors; value } ->
+  | Error.Check.Invalid_record { errors; value } ->
     Repr.(
       record
         [ "kind", string "invalid_record"
         ; "value", value
         ; "errors", list_of error_for_record_to_repr (Nel.to_list errors)
         ])
-  | Error.Unexpected_value { value; message } ->
+  | Error.Check.Unexpected_value { value; message } ->
     Repr.(
       record
         [ "kind", string "unexpected_value"
@@ -111,16 +111,16 @@ let rec error_for_value_to_repr = function
         ])
 
 and error_for_record_to_repr = function
-  | Error.Missing_field field ->
+  | Error.Check.Missing_field field ->
     Repr.(
       record [ "kind", string "missing_field"; "field", field_with_alt field ])
-  | Error.Invalid_subrecord err ->
+  | Error.Check.Invalid_subrecord err ->
     Repr.(
       record
         [ "kind", string "invalid_subrecord"
         ; "errors", error_for_value_to_repr err
         ])
-  | Error.Invalid_field { field; error } ->
+  | Error.Check.Invalid_field { field; error } ->
     Repr.(
       record
         [ "kind", string "invalid_field"
@@ -134,7 +134,7 @@ let error_for_value ppf err =
 ;;
 
 let error_for_sexp_parsing_to_repr = function
-  | Error.Non_terminated_node pos ->
+  | Error.Sexp.Non_terminated_node pos ->
     Repr.(record [ "kind", string "non_terminated_node"; "position", int pos ])
 ;;
 

@@ -21,3 +21,11 @@ val escape_spaces : string -> string
 (** [concat_with ~sep f xs] concat every elts of [xs] with [sep] using
     [f] on each element. *)
 val concat_with : sep:string -> ('a -> string) -> 'a list -> string
+
+(** See {!val:concat_with} buf acting on Buffer. *)
+val concat_buffer_with
+  :  sep:string
+  -> Buffer.t
+  -> (Buffer.t -> 'a -> unit)
+  -> 'a list
+  -> unit
