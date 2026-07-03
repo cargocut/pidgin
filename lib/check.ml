@@ -3,7 +3,7 @@
 
    SPDX-License-Identifier: BSD-3-Clause *)
 
-type value_error=
+type value_error =
   | Unexpected_kind of
       { expected : Kind.t
       ; given : Kind.t
