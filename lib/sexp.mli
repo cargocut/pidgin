@@ -56,3 +56,11 @@ val to_string : t -> string
 
 (** Equality between S-Expressions. *)
 val equal : t -> t -> bool
+
+(** {1 Drivers} *)
+
+(** S-expression can be use as a target. *)
+include Intf.TARGET with type t := t
+
+(** S-expression can be use as a source. *)
+include Intf.SOURCE with type t := t

@@ -110,3 +110,74 @@ let from_seq seq =
 ;;
 
 let from_string str = str |> String.to_seq |> from_seq
+
+let rec translate_from_pidgin = function
+  | Repr.Null -> atom "null"
+  | Repr.Bool r -> atom (if r then "true" else "false")
+  | Repr.Int i -> atom (string_of_int i)
+  | Repr.Float f -> atom (string_of_float f)
+  | Repr.String s -> atom s
+  | Repr.List xs -> node (List.map translate_from_pidgin xs)
+  | Repr.Record xs ->
+    node
+      (List.map
+         (fun (k, value) -> node [ atom k; translate_from_pidgin value ])
+         xs)
+;;
+
+let translate_atom x =
+  (* NOTE: Since S-expressions carry far less information than the
+     Pidgin representation, we have to do a bit of magic to correctly
+     assign Pidgin data types. *)
+  match int_of_string_opt x with
+  | Some i -> Repr.int i
+  | None ->
+    (* KLUDGE: YOCaml use a fancy alt combinator <|> but that means
+       evaluating all the branches, even if it's successful, and I
+       didn't feel comfortable going with the "trunk" [unit -> option]. *)
+    (match float_of_string_opt x with
+     | Some f -> Repr.float f
+     | None -> Repr.string x)
+;;
+
+let rec translate_to_pidgin = function
+  | Atom x when String.equal (Misc.strim x) "null" -> Repr.null ()
+  | Atom x when String.equal (Misc.strim x) "true" -> Repr.bool true
+  | Atom x when String.equal (Misc.strim x) "false" -> Repr.bool false
+  | Atom x -> translate_atom x
+  | Node [ Atom key; value ] -> render_pair key (translate_to_pidgin value)
+  | Node xs -> list_or_record xs
+
+and render_pair key value =
+  (* NOTE: to be consistent with the way we handle pair in
+     [list_or_record]. Instead of building a pair, we build a list of
+     two element, since it can be checked as pair. *)
+  Repr.(list [ string key; value ])
+
+and list_or_record xs =
+  (* NOTE: FMPOV (@mspwn) The processing in YOCaml is a bit too
+     resource-intensive; it first checks every element in the list to
+     determine whether it is a record or not. Here, we construct the
+     list and the record simultaneously, and as soon as it becomes
+     clear that it is not a record, we fall back to a list. *)
+  let rec aux list_acc record_acc = function
+    | [] ->
+      (match record_acc with
+       | [] ->
+         (* If the record is empty, we assume a list *)
+         Repr.list []
+       | xs ->
+         (* KLUDGE: Maybe the reverse order isn't very useful
+            (just like the order in record validation, which
+            isn't very meaningful). *)
+         Repr.record (List.rev xs))
+    | Node [ Atom key; value ] :: xs ->
+      let value = translate_to_pidgin value in
+      aux (render_pair key value :: list_acc) ((key, value) :: record_acc) xs
+    | xs ->
+      (* If we have something other than what looks a bit like a pair
+         of records, we decide that, actually... it was a list. *)
+      Repr.list (List.rev_append list_acc (List.map translate_to_pidgin xs))
+  in
+  aux [] [] xs
+;;
