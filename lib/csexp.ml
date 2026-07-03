@@ -130,3 +130,5 @@ let from_seq seq =
 ;;
 
 let from_string str = str |> String.to_seq |> from_seq
+let translate_from_pidgin = Sexp.translate_from_pidgin
+let translate_to_pidgin = Sexp.translate_to_pidgin

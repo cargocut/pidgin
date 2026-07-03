@@ -20,5 +20,6 @@ let () =
     ; Sexp_parser_test.cases
     ; Csexp_to_string_test.cases
     ; Csexp_parser_test.cases
+    ; Sexp_repr_test.cases
     ]
 ;;
