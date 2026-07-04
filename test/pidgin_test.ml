@@ -22,5 +22,6 @@ let () =
     ; Csexp_parser_test.cases
     ; Sexp_repr_test.cases
     ; Json_test.cases
+    ; Driver_simple_round_trip_test.cases
     ]
 ;;

@@ -90,8 +90,10 @@ val float : float t
     as representation). *)
 val number : float t
 
-(** Validator from {!type:Repr.t} to [string]. *)
-val string : string t
+(** Validator from {!type:Repr.t} to [string]. By default [strict] is
+    [true] but when it is [false], it accepts also [bool], [int],
+    [float] and a singleton [list] as a valid input. *)
+val string : ?strict:bool -> string t
 
 (** Validator from {!type:Repr.t} to [char]. *)
 val char : char t

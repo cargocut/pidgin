@@ -263,6 +263,50 @@ open struct
         expected
         computed)
   ;;
+
+  let yojson_int32 =
+    test_case "From Yojson to Repr" `Quick (fun () ->
+      let expected = Repr.int32 145l
+      and computed =
+        Repr.int32 145l
+        |> Driver.Yojson.translate_from_pidgin
+        |> Driver.Yojson.translate_to_pidgin
+      in
+      check Test_lib.Testable.repr "should be equal" expected computed)
+  ;;
+
+  let ezjsonm_int32 =
+    test_case "From Ezjsonm to Repr" `Quick (fun () ->
+      let expected = Repr.int32 145l
+      and computed =
+        Repr.int32 145l
+        |> Driver.Ezjsonm.translate_from_pidgin
+        |> Driver.Ezjsonm.translate_to_pidgin
+      in
+      check Test_lib.Testable.repr "should be equal" expected computed)
+  ;;
+
+  let yojson_int64 =
+    test_case "From Yojson to Repr" `Quick (fun () ->
+      let expected = Repr.int64 145L
+      and computed =
+        Repr.int64 145L
+        |> Driver.Yojson.translate_from_pidgin
+        |> Driver.Yojson.translate_to_pidgin
+      in
+      check Test_lib.Testable.repr "should be equal" expected computed)
+  ;;
+
+  let ezjsonm_int64 =
+    test_case "From Ezjsonm to Repr" `Quick (fun () ->
+      let expected = Repr.int64 145L
+      and computed =
+        Repr.int64 145L
+        |> Driver.Ezjsonm.translate_from_pidgin
+        |> Driver.Ezjsonm.translate_to_pidgin
+      in
+      check Test_lib.Testable.repr "should be equal" expected computed)
+  ;;
 end
 
 let cases =
@@ -289,5 +333,9 @@ let cases =
     ; ezjsonm_to_repr9
     ; user_yojson0
     ; user_ezjsonm0
+    ; yojson_int32
+    ; ezjsonm_int32
+    ; yojson_int64
+    ; ezjsonm_int64
     ] )
 ;;

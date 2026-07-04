@@ -117,8 +117,12 @@ let float = function
   | x -> raise_unexpected_kind Kind.float x
 ;;
 
-let string = function
+let rec string ?(strict = true) = function
   | Repr.String s -> Ok s
+  | Repr.Bool b when not strict -> Ok (if b then "true" else "false")
+  | Repr.Int x when not strict -> Ok (string_of_int x)
+  | Repr.Float x when not strict -> Ok (string_of_float x)
+  | Repr.List [ x ] when not strict -> string ~strict x
   | x -> raise_unexpected_kind Kind.string x
 ;;
 
@@ -296,7 +300,7 @@ let int32 = function
     repr
     |> sum
          [ ( "int32"
-           , string
+           , string ~strict:false
              & where_opt
                  ~value:repr
                  ~message:"int32 expected"
@@ -312,7 +316,7 @@ let int64 = function
     |> (int32 $ Int64.of_int32)
        / sum
            [ ( "int64"
-             , string
+             , string ~strict:false
                & where_opt
                    ~value:repr
                    ~message:"int64 expected"

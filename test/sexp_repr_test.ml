@@ -166,6 +166,38 @@ open struct
         expected
         computed)
   ;;
+
+  let int32 =
+    test_case "From Yojson to Repr" `Quick (fun () ->
+      let expected = Ok 145l
+      and computed =
+        Repr.int32 145l
+        |> Driver.Sexp.translate_from_pidgin
+        |> Driver.Sexp.translate_to_pidgin
+        |> Check.int32
+      in
+      check
+        Test_lib.Testable.(checked int32)
+        "should be equal"
+        expected
+        computed)
+  ;;
+
+  let int64 =
+    test_case "From Yojson to Repr" `Quick (fun () ->
+      let expected = Ok 145L
+      and computed =
+        Repr.int64 145L
+        |> Driver.Sexp.translate_from_pidgin
+        |> Driver.Sexp.translate_to_pidgin
+        |> Check.int64
+      in
+      check
+        Test_lib.Testable.(checked int64)
+        "should be equal"
+        expected
+        computed)
+  ;;
 end
 
 let cases =
@@ -181,5 +213,7 @@ let cases =
     ; sexp_to_repr8
     ; sexp_to_repr9
     ; user0
+    ; int32
+    ; int64
     ] )
 ;;
