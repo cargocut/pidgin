@@ -28,14 +28,13 @@ open struct
         Error
           (Invalid_list
              { errors =
-                 Nel.
-                   [ ( 1
-                     , Unexpected_kind
-                         { expected = Kind.int
-                         ; given = Kind.string
-                         ; value = Repr.string "test"
-                         } )
-                   ]
+                 [ ( 1
+                   , Unexpected_kind
+                       { expected = Kind.int
+                       ; given = Kind.string
+                       ; value = Repr.string "test"
+                       } )
+                 ]
              ; value = repr
              })
       and computed = Check.(nel_of int) repr in
