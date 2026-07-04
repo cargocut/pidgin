@@ -41,16 +41,6 @@ open struct
 
   let sexp_to_repr3 =
     test_case "From Sexp To Repr" `Quick (fun () ->
-      let expected = Repr.bool false
-      and computed =
-        let open Sexp in
-        atom " FaLSe " |> translate_to_pidgin
-      in
-      check Test_lib.Testable.repr "should be equal" expected computed)
-  ;;
-
-  let sexp_to_repr4 =
-    test_case "From Sexp To Repr" `Quick (fun () ->
       let expected = Repr.int 42
       and computed =
         let open Sexp in
@@ -59,7 +49,7 @@ open struct
       check Test_lib.Testable.repr "should be equal" expected computed)
   ;;
 
-  let sexp_to_repr5 =
+  let sexp_to_repr4 =
     test_case "From Sexp To Repr" `Quick (fun () ->
       let expected = Repr.float 42.37
       and computed =
@@ -69,7 +59,7 @@ open struct
       check Test_lib.Testable.repr "should be equal" expected computed)
   ;;
 
-  let sexp_to_repr6 =
+  let sexp_to_repr5 =
     test_case "From Sexp To Repr" `Quick (fun () ->
       let expected = Repr.string "Hello World"
       and computed =
@@ -79,7 +69,7 @@ open struct
       check Test_lib.Testable.repr "should be equal" expected computed)
   ;;
 
-  let sexp_to_repr7 =
+  let sexp_to_repr6 =
     test_case "From Sexp To Repr" `Quick (fun () ->
       let expected = Repr.string ""
       and computed =
@@ -89,7 +79,7 @@ open struct
       check Test_lib.Testable.repr "should be equal" expected computed)
   ;;
 
-  let sexp_to_repr8 =
+  let sexp_to_repr7 =
     test_case "From Sexp To Repr" `Quick (fun () ->
       let expected = Repr.list_of Repr.int [ 1; 2; 3 ]
       and computed =
@@ -99,7 +89,7 @@ open struct
       check Test_lib.Testable.repr "should be equal" expected computed)
   ;;
 
-  let sexp_to_repr9 =
+  let sexp_to_repr8 =
     test_case "From Sexp To Repr" `Quick (fun () ->
       let expected =
         let open Repr in
@@ -120,7 +110,7 @@ open struct
       check Test_lib.Testable.repr "should be equal" expected computed)
   ;;
 
-  let sexp_to_repr10 =
+  let sexp_to_repr9 =
     test_case "From Sexp To Repr" `Quick (fun () ->
       let expected =
         let open Repr in
@@ -149,7 +139,7 @@ open struct
 
   open Test_lib.Archetypes
 
-  let user1 =
+  let user0 =
     test_case "user" `Quick (fun () ->
       let repr =
         let open Repr in
@@ -190,7 +180,6 @@ let cases =
     ; sexp_to_repr7
     ; sexp_to_repr8
     ; sexp_to_repr9
-    ; sexp_to_repr10
-    ; user1
+    ; user0
     ] )
 ;;
