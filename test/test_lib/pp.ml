@@ -188,3 +188,12 @@ let result ok error =
 let checked_value ok = result ok check_error
 let sexp_parsed = result sexp sexp_parsing_error
 let csexp_parsed = result sexp csexp_parsing_error
+
+let nel o ppf nel =
+  let open Format in
+  fprintf
+    ppf
+    "nel@[[%a]@]"
+    (pp_print_list ~pp_sep:(fun ppf () -> fprintf ppf ";@ ") o)
+    (Nel.to_list nel)
+;;

@@ -101,8 +101,14 @@ val char : char t
 (** Validator from {!type:Repr.t} to [list]. *)
 val list : Repr.t list t
 
+(** Validator from {!type:Repr.t} to [non-empty list]. *)
+val nel : Repr.t Nel.t t
+
 (** [list_of v] is a validator for list that satisfay [v]. *)
 val list_of : 'a t -> 'a list t
+
+(** [nel_of v] is a validator for non-empty-list that satisfay [v]. *)
+val nel_of : 'a t -> 'a Nel.t t
 
 (** [option v] is a validator to [option]. *)
 val option : 'a t -> 'a option t

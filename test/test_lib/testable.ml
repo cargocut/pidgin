@@ -6,6 +6,10 @@
 let kind = Alcotest.testable Pp.kind Kind.equal
 let repr = Alcotest.testable Pp.repr Repr.equal
 
+let nel t =
+  Alcotest.testable (Pp.nel @@ Alcotest.pp t) (Nel.equal @@ Alcotest.equal t)
+;;
+
 let checked ok =
   let error = Alcotest.testable Pp.check_error Eq.check_error in
   Alcotest.result ok error

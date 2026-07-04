@@ -111,6 +111,13 @@ val int32 : int32 conv
     [{constr = "int64"; value = string n}] as an underlying representation. *)
 val int64 : int64 conv
 
+(** [Non empty list] converter. *)
+val nel : t Nel.t conv
+
+(** [nel_of conv l] build a non-empty-list of {!val:t} using
+    [conv]. *)
+val nel_of : 'a conv -> 'a Nel.t conv
+
 (** {1 Mapping} *)
 
 (** [using f conv] is a contramap. If we have a function from [b] to [a],
