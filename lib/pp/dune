@@ -1,0 +1,4 @@
+(library
+  (name pidgin_pp)
+  (public_name pidgin_pp)
+  (libraries pidgin))
