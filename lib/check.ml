@@ -35,6 +35,16 @@ type ('a, 'b) fn = 'a -> 'b value
 type 'a t = (Repr.t, 'a) fn
 type 'a record = ('a, record_error Nel.t) result
 
+module type CHECKABLE = sig
+  type t
+
+  val from_pidgin : (Repr.t, t) fn
+end
+
+let from (type a) (module C : CHECKABLE with type t = a) repr =
+  C.from_pidgin repr
+;;
+
 module Infix = struct
   let ( <$> ) = Result.map
   let ( $ ) l f x = Result.map f (l x)

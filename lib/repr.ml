@@ -34,6 +34,13 @@ let rec equal a b =
 
 type 'a conv = 'a -> t
 
+module type PROJECTABLE = sig
+  type t
+
+  val to_pidgin : t conv
+end
+
+let into (type a) (module P : PROJECTABLE with type t = a) x = P.to_pidgin x
 let using f conv x = conv (f x)
 let replace n = using (fun _ -> n)
 let null _ = Null

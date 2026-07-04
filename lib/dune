@@ -1,5 +1,4 @@
 (library
  (name pidgin)
  (public_name pidgin)
- (modules_without_implementation intf)
  (libraries nel))

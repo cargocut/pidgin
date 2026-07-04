@@ -41,6 +41,17 @@ type t =
     contravariant functor that can be used with {!val:using}. *)
 type 'a conv = 'a -> t
 
+module type PROJECTABLE = sig
+  (** Describes a module in which {!type:t} can be projected into a
+      [pidgin] representation. *)
+
+  (** The type that can be projected *)
+  type t
+
+  (** [to_pidgin t] converts [t] to a representation {!type:Pidgin.Repr.t} *)
+  val to_pidgin : t conv
+end
+
 (** {1 Term construction}
 
     Combinators for constructing values in the representation
@@ -117,6 +128,11 @@ val nel : t Nel.t conv
 (** [nel_of conv l] build a non-empty-list of {!val:t} using
     [conv]. *)
 val nel_of : 'a conv -> 'a Nel.t conv
+
+(** {2 Specific converters} *)
+
+(** [into (module Proj)] converts value using [Proj.to_pidgin]. *)
+val into : (module PROJECTABLE with type t = 'a) -> 'a conv
 
 (** {1 Mapping} *)
 
