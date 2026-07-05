@@ -56,3 +56,13 @@ let rec kind ppf =
          (fun ppf (key, value) -> fprintf ppf "@[<1>%S:@ %a@]" key kind value))
       fields
 ;;
+
+let rec sexp ppf = function
+  | Sexp.Atom x -> Format.pp_print_string ppf (Misc.escape_spaces x)
+  | Sexp.Node xs -> Format.fprintf ppf "@[<hv 1>(%a)@]" sexp_list xs
+
+and sexp_list ppf = function
+  | [] -> ()
+  | [ x ] -> sexp ppf x
+  | x :: xs -> Format.fprintf ppf "%a@ %a" sexp x sexp_list xs
+;;

@@ -18,3 +18,10 @@ val repr : Format.formatter -> Pidgin.Repr.t -> unit
 (** Pretty-printer for {!type:Pidgin.Kind.t}. Try to make the Kinds
     readable.. *)
 val kind : Format.formatter -> Pidgin.Kind.t -> unit
+
+(** {1 S-Expression}
+
+    Pretty-printers for printing S-Expressions and canonical
+    S-Expressions. *)
+
+val sexp : Format.formatter -> Pidgin.Sexp.t -> unit
