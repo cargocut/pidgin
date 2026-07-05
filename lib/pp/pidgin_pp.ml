@@ -56,26 +56,3 @@ let rec kind ppf =
          (fun ppf (key, value) -> fprintf ppf "@[<1>%S:@ %a@]" key kind value))
       fields
 ;;
-
-let (* rec *) value_error ppf =
-  let open Format in
-  function
-  | Check.Unexpected_kind { expected; given; value } ->
-    fprintf
-      ppf
-      "@[<v>Unexpected kind for (%a).@,Expected: %a@,Given: %a@]"
-      repr
-      value
-      kind
-      expected
-      kind
-      given
-  | Check.Unexpected_value { value; message } ->
-    fprintf
-      ppf
-      "@[Unexpected value%a:@,@[<hov 2>%s@]@]"
-      (pp_print_option (fun ppf x -> fprintf ppf " @,@[(%a)@]" repr x))
-      value
-      message
-  | _ -> assert false
-;;

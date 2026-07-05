@@ -66,7 +66,15 @@ let%expect_test "dump a record" =
                       [ "nickname", string "mspwn"
                       ; "gender", string "male"
                       ; "email", string "msp@domain.com"
-                      ; "level", int 10
+                      ; ( "level"
+                        , list
+                            [ int 10
+                            ; bool true
+                            ; record
+                                [ "role", string "admin"
+                                ; "label", string "is an administrator"
+                                ]
+                            ] )
                       ] )
                 ] )
           ; "level", int 10
@@ -104,7 +112,8 @@ let%expect_test "dump a record" =
              {"nickname": string,
                "gender": string,
                "email": string,
-               "level": int}},
+               "level": [(bool | int | {"role": string,
+                                         "label": string})]}},
          "level": int})]
     |}]
 ;;
@@ -149,6 +158,5 @@ let%expect_test "dump a record" =
       ]
   in
   dump (or_ any @@ infer r);
-  [%expect
-    {| any |}]
+  [%expect {| any |}]
 ;;

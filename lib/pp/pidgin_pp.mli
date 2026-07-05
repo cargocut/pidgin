@@ -18,11 +18,3 @@ val repr : Format.formatter -> Pidgin.Repr.t -> unit
 (** Pretty-printer for {!type:Pidgin.Kind.t}. Try to make the Kinds
     readable.. *)
 val kind : Format.formatter -> Pidgin.Kind.t -> unit
-
-(** {2 Errors}
-
-    Pretty-printers for printing errors. Since errors are not
-    abstract, you can bring your own pretty-printer. *)
-
-(** Pretty printer for Validation errors. *)
-val value_error : Format.formatter -> Pidgin.Check.value_error -> unit
