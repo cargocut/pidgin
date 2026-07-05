@@ -24,4 +24,12 @@ val kind : Format.formatter -> Pidgin.Kind.t -> unit
     Pretty-printers for printing S-Expressions and canonical
     S-Expressions. *)
 
+(** Pretty-printer for {!type:Pidgin.Sexp.t} (with
+    identation). Generally useful for dumping S-expressions to a
+    file. *)
 val sexp : Format.formatter -> Pidgin.Sexp.t -> unit
+
+(** Does not produce any special pretty-printing, in order to preserve
+    the canonical nature of a canonical S-expression. See
+    {!val:Pidgin.Csexp.to_string}. *)
+val csexp : Format.formatter -> Pidgin.Csexp.t -> unit

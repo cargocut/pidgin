@@ -66,3 +66,5 @@ and sexp_list ppf = function
   | [ x ] -> sexp ppf x
   | x :: xs -> Format.fprintf ppf "%a@ %a" sexp x sexp_list xs
 ;;
+
+let csexp ppf sexp = Format.pp_print_string ppf (Csexp.to_string sexp)
