@@ -73,20 +73,19 @@ open struct
           (Check.Invalid_list
              { value = repr
              ; errors =
-                 Nel.from_list_exn
-                   [ ( 0
-                     , Check.Unexpected_kind
-                         { expected = Kind.(list any)
-                         ; value = Repr.string "foo"
-                         ; given = Kind.string
-                         } )
-                   ; ( 1
-                     , Check.Unexpected_kind
-                         { expected = Kind.(list any)
-                         ; value = Repr.string "bar"
-                         ; given = Kind.string
-                         } )
-                   ]
+                 [ ( 0
+                   , Check.Unexpected_kind
+                       { expected = Kind.(list any)
+                       ; value = Repr.string "foo"
+                       ; given = Kind.string
+                       } )
+                 ; ( 1
+                   , Check.Unexpected_kind
+                       { expected = Kind.(list any)
+                       ; value = Repr.string "bar"
+                       ; given = Kind.string
+                       } )
+                 ]
              })
       and computed = repr |> Check.(list_of (list_of int)) in
       check

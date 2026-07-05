@@ -33,9 +33,9 @@ open struct
         Check.Invalid_record
           { value = repr
           ; errors =
-              Nel.(
-                Check.Missing_field (singleton "gender")
-                :: [ Check.Missing_field ("nickname" :: [ "nick"; "pseudo" ]) ])
+              [ Check.Missing_field [ "gender" ]
+              ; Check.Missing_field [ "nickname"; "nick"; "pseudo" ]
+              ]
           }
         |> Result.error
       and computed = repr |> Human.from_pidgin in
@@ -91,8 +91,7 @@ open struct
         Check.Invalid_record
           { value = repr
           ; errors =
-              Nel.(
-                Check.Invalid_field
+              [ Check.Invalid_field
                   { field = Nel.singleton "age"
                   ; error =
                       Check.Unexpected_kind
@@ -101,7 +100,8 @@ open struct
                         ; given = Kind.string
                         }
                   }
-                :: [ Check.Missing_field ("nickname" :: [ "nick"; "pseudo" ]) ])
+              ; Check.Missing_field [ "nickname"; "nick"; "pseudo" ]
+              ]
           }
         |> Result.error
       and computed = repr |> Human.from_pidgin in
@@ -224,16 +224,13 @@ open struct
         Check.Invalid_record
           { value = repr
           ; errors =
-              Nel.(
-                Check.Missing_field ("email" :: [ "mail" ])
-                :: [ Check.Invalid_subrecord
-                       (Check.Invalid_record
-                          { value = repr
-                          ; errors =
-                              singleton
-                              @@ Check.Missing_field (singleton "gender")
-                          })
-                   ])
+              [ Check.Missing_field [ "email"; "mail" ]
+              ; Check.Invalid_subrecord
+                  (Check.Invalid_record
+                     { value = repr
+                     ; errors = [ Check.Missing_field [ "gender" ] ]
+                     })
+              ]
           }
         |> Result.error
       and computed = repr |> User.from_pidgin in

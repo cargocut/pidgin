@@ -15,6 +15,13 @@ val kind : Format.formatter -> Kind.t -> unit
 (** A pretty-printer for Sexp. *)
 val sexp : Format.formatter -> Sexp.t -> unit
 
+(** A pretty-printer for Nel. *)
+val nel
+  :  (Format.formatter -> 'a -> unit)
+  -> Format.formatter
+  -> 'a Nel.t
+  -> unit
+
 (** A pretty-printer for value_error. *)
 val check_error : Format.formatter -> Check.value_error -> unit
 

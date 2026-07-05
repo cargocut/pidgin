@@ -34,6 +34,13 @@ let rec equal a b =
 
 type 'a conv = 'a -> t
 
+module type PROJECTABLE = sig
+  type t
+
+  val to_pidgin : t conv
+end
+
+let into (type a) (module P : PROJECTABLE with type t = a) x = P.to_pidgin x
 let using f conv x = conv (f x)
 let replace n = using (fun _ -> n)
 let null _ = Null
@@ -43,6 +50,8 @@ let float f = Float f
 let string s = String s
 let list l = List l
 let list_of conv l = list @@ List.map conv l
+let nel l = list (Nel.to_list l)
+let nel_of conv l = list_of conv (Nel.to_list l)
 
 let record ?(normalize_keys = true) assoc =
   (* NOTE: Empty records are allowed. *)

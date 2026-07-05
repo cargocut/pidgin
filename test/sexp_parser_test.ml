@@ -223,6 +223,48 @@ open struct
       and computed = Sexp.from_string str in
       check Test_lib.Testable.sexp_parsed "should be equal" expected computed)
   ;;
+
+  let parse_simple_node4 =
+    test_case "Parse node" `Quick (fun () ->
+      let str =
+        {|
+    ((foo (1))
+     (bar 2)
+     (a_complicated_node 2)
+     (baz
+      ((flag true)
+       (message Hello\ World)
+       (message2 Hello\ World)
+       (message3 Hello\ World key value (0 1 2 3 4 5 6)))))
+    |}
+      in
+      let expected =
+        Ok
+          Sexp.(
+            node
+              [ node [ atom "foo"; node [ atom "1" ] ]
+              ; node [ atom "bar"; atom "2" ]
+              ; node [ atom "a_complicated_node"; atom "2" ]
+              ; node
+                  [ atom "baz"
+                  ; node
+                      [ node [ atom "flag"; atom "true" ]
+                      ; node [ atom "message"; atom "Hello World" ]
+                      ; node [ atom "message2"; atom "Hello World" ]
+                      ; node
+                          [ atom "message3"
+                          ; atom "Hello World"
+                          ; atom "key"
+                          ; atom "value"
+                          ; node
+                              (List.init 7 (fun i -> atom @@ string_of_int i))
+                          ]
+                      ]
+                  ]
+              ])
+      and computed = Sexp.from_string str in
+      check Test_lib.Testable.sexp_parsed "should be equal" expected computed)
+  ;;
 end
 
 let cases =
@@ -239,5 +281,6 @@ let cases =
     ; parse_invalid_expr1
     ; parse_invalid_expr2
     ; parse_invalid_expr3
+    ; parse_simple_node4
     ] )
 ;;

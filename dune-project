@@ -36,3 +36,15 @@
  (ocp-indent :with-dev-setup)
  (merlin :with-dev-setup)
  (ocaml-lsp-server :with-dev-setup)))
+
+
+(package
+  (name pidgin_pp)
+  (synopsis "Pretty-printers for the Pidgin Language")
+  (description "Defined a set of pretty-printers to handle the different types described by the Pidgin library")
+  (depends
+    (ocaml (>= 5.0.0))
+    (pidgin (= :version))
+
+     ;; test setup
+    (ppx_expect (and :with_test (>= 0.17.3)))))

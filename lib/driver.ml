@@ -3,8 +3,17 @@
 
    SPDX-License-Identifier: BSD-3-Clause *)
 
-module type SOURCE = Intf.SOURCE
-module type TARGET = Intf.TARGET
+module type SOURCE = sig
+  type t
+
+  val translate_to_pidgin : t -> Repr.t
+end
+
+module type TARGET = sig
+  type t
+
+  val translate_from_pidgin : Repr.t -> t
+end
 
 module Sexp = struct
   type t = Sexp.t

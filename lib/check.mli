@@ -63,6 +63,17 @@ type ('a, 'b) fn = 'a -> 'b value
     from a {!type:Repr.t}. *)
 type 'a t = (Repr.t, 'a) fn
 
+module type CHECKABLE = sig
+  (** Describes a module whose values of type {!type:t} can be
+      checked from a Pidgin representation ({!type:Repr.t}) *)
+
+  (** The type that can be checked *)
+  type t
+
+  (** [from_pidgin repr] check [repr] into [t]. *)
+  val from_pidgin : (Repr.t, t) fn
+end
+
 (** {1 Data Validation} *)
 
 (** [const x] always succeed with [x]. *)
@@ -101,8 +112,14 @@ val char : char t
 (** Validator from {!type:Repr.t} to [list]. *)
 val list : Repr.t list t
 
+(** Validator from {!type:Repr.t} to [non-empty list]. *)
+val nel : Repr.t Nel.t t
+
 (** [list_of v] is a validator for list that satisfay [v]. *)
 val list_of : 'a t -> 'a list t
+
+(** [nel_of v] is a validator for non-empty-list that satisfay [v]. *)
+val nel_of : 'a t -> 'a Nel.t t
 
 (** [option v] is a validator to [option]. *)
 val option : 'a t -> 'a option t
@@ -122,6 +139,8 @@ val pair : 'a t -> 'b t -> ('a * 'b) t
 
 (** [triple f s t] is a validator for triple. *)
 val triple : 'a t -> 'b t -> 'c t -> ('a * 'b * 'c) t
+
+val from : (module CHECKABLE with type t = 'a) -> 'a t
 
 (** {2 Predicates} *)
 

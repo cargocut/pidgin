@@ -71,7 +71,7 @@ open struct
 
   let infer_list3 =
     test_case "infer" `Quick (fun () ->
-      let expected = Kind.(list (list (tuple Nel.(int :: string :: [ bool ]))))
+      let expected = Kind.(list (list (tuple [ int; string; bool ])))
       and computed =
         Kind.infer
           Repr.(

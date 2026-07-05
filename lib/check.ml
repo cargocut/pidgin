@@ -35,6 +35,16 @@ type ('a, 'b) fn = 'a -> 'b value
 type 'a t = (Repr.t, 'a) fn
 type 'a record = ('a, record_error Nel.t) result
 
+module type CHECKABLE = sig
+  type t
+
+  val from_pidgin : (Repr.t, t) fn
+end
+
+let from (type a) (module C : CHECKABLE with type t = a) repr =
+  C.from_pidgin repr
+;;
+
 module Infix = struct
   let ( <$> ) = Result.map
   let ( $ ) l f x = Result.map f (l x)
@@ -134,6 +144,13 @@ let list = function
     raise_unexpected_kind Kind.(list any) x
 ;;
 
+let guard_nel = function
+  | x :: xs -> Ok (Nel.make x xs)
+  | [] -> fail_with ~value:(Repr.list []) "The list should not be empty"
+;;
+
+let nel = list & guard_nel
+
 let list_of v = function
   | Repr.List xs as value ->
     let _i, mapped_result =
@@ -158,6 +175,8 @@ let list_of v = function
        kind information. *)
     raise_unexpected_kind Kind.(list any) x
 ;;
+
+let nel_of v = list_of v & guard_nel
 
 let option some = function
   | Repr.Null -> Ok None

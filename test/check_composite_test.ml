@@ -43,7 +43,7 @@ open struct
       let expected =
         Error
           (Check.Unexpected_kind
-             { expected = Nel.(Kind.(sum (("ok", any) :: [ "error", any ])))
+             { expected = Kind.(sum [ "ok", any; "error", any ])
              ; value = repr
              ; given = Kind.(branch "right" string)
              })
