@@ -21,7 +21,8 @@ val kind : Format.formatter -> Pidgin.Kind.t -> unit
 
 (** {2 Errors}
 
-    Pretty-printers for printing errors. *)
+    Pretty-printers for printing errors. Since errors are not
+    abstract, you can bring your own pretty-printer. *)
 
 (** Pretty printer for Validation errors. *)
-(* val value_error : Format.formatter -> Pidgin.Check.value_error -> unit *)
+val value_error : Format.formatter -> Pidgin.Check.value_error -> unit

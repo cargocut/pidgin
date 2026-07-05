@@ -22,7 +22,7 @@ let rec repr ppf =
   | Record fields ->
     fprintf
       ppf
-      "@[<hov 1>{%a}@]"
+      "@[<v 2>{%a}@]"
       (pp_print_list
          ~pp_sep:(fun ppf () -> fprintf ppf ",@;")
          (fun ppf (key, value) -> fprintf ppf "@[<1>%S:@ %a@]" key repr value))
@@ -42,17 +42,40 @@ let rec kind ppf =
   | Kind.Or l ->
     fprintf
       ppf
-      "@[<hov 1>(%a)@]"
-      (pp_print_list ~pp_sep:(fun ppf () -> fprintf ppf "@;| ") kind)
+      "@[<hov>(%a)@]"
+      (pp_print_list ~pp_sep:(fun ppf () -> fprintf ppf "@ | ") kind)
       l
   | Kind.Pair (a, b) -> fprintf ppf "@[(%a@ * %a)@]" kind a kind b
   | Kind.Branch (k, v) -> fprintf ppf "#%s<@[%a@]>" (Misc.strim k) kind v
   | Kind.Record fields ->
     fprintf
       ppf
-      "@[<hov 1>{%a}@]"
+      "@[<v 2>{%a}@]"
       (pp_print_list
          ~pp_sep:(fun ppf () -> fprintf ppf ",@;")
          (fun ppf (key, value) -> fprintf ppf "@[<1>%S:@ %a@]" key kind value))
       fields
+;;
+
+let (* rec *) value_error ppf =
+  let open Format in
+  function
+  | Check.Unexpected_kind { expected; given; value } ->
+    fprintf
+      ppf
+      "@[<v>Unexpected kind for (%a).@,Expected: %a@,Given: %a@]"
+      repr
+      value
+      kind
+      expected
+      kind
+      given
+  | Check.Unexpected_value { value; message } ->
+    fprintf
+      ppf
+      "@[Unexpected value%a:@,@[<hov 2>%s@]@]"
+      (pp_print_option (fun ppf x -> fprintf ppf " @,@[(%a)@]" repr x))
+      value
+      message
+  | _ -> assert false
 ;;

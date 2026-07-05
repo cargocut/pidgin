@@ -90,13 +90,65 @@ let%expect_test "dump a record" =
   [%expect
     {|
     [(int | string
-      | [(#left<#error<string>> | #left<#ok<#right<string>>> | #right<string>)]
-      | (int * (string * bool))
-      | {"nickname": string, "gender": string, "email": string,
+     | [(#left<#error<string>> | #left<#ok<#right<string>>> | #right<string>)]
+     | (int * (string * bool))
+     | {"nickname": string,
+         "gender": string,
+         "email": string,
          "other":
-          {"nickname": string, "gender": string, "email": string, "level": int,
-           "more_nesting":
-            {"nickname": string, "gender": string, "email": string, "level": int}},
+          {"nickname": string,
+            "gender": string,
+            "email": string,
+            "level": int,
+            "more_nesting":
+             {"nickname": string,
+               "gender": string,
+               "email": string,
+               "level": int}},
          "level": int})]
     |}]
+;;
+
+let%expect_test "dump a record" =
+  let r =
+    let open Pidgin.Repr in
+    list
+      [ record
+          [ "nickname", string "mspwn"
+          ; "gender", string "male"
+          ; "email", string "msp@domain.com"
+          ; ( "other"
+            , record
+                [ "nickname", string "mspwn"
+                ; "gender", string "male"
+                ; "email", string "msp@domain.com"
+                ; "level", int 10
+                ; ( "more_nesting"
+                  , record
+                      [ "nickname", string "mspwn"
+                      ; "gender", string "male"
+                      ; "email", string "msp@domain.com"
+                      ; "level", int 10
+                      ] )
+                ] )
+          ; "level", int 10
+          ]
+      ; int 45
+      ; string "Hello World"
+      ; list_of
+          (either
+             ~left:(result ~ok:(either ~left:int ~right:string) ~error:string)
+             ~right:string)
+          [ Left (Ok (Right "foo"))
+          ; Right "foo"
+          ; Left (Error "Hello")
+          ; Left (Ok (Right "World"))
+          ]
+      ; triple int string bool (43, "Hello World", true)
+      ; triple int string bool (23, "Hello", false)
+      ]
+  in
+  dump (or_ any @@ infer r);
+  [%expect
+    {| any |}]
 ;;

@@ -75,8 +75,10 @@ let%expect_test "dump a record" =
        ]);
   [%expect
     {|
-    {"nickname": "mspwn", "gender": "male", "email": "msp@domain.com",
-     "level": 10}
+    {"nickname": "mspwn",
+      "gender": "male",
+      "email": "msp@domain.com",
+      "level": 10}
     |}]
 ;;
 
@@ -104,12 +106,19 @@ let%expect_test "dump an other record" =
        ]);
   [%expect
     {|
-    {"nickname": "mspwn", "gender": "male", "email": "msp@domain.com",
-     "other":
-      {"nickname": "mspwn", "gender": "male", "email": "msp@domain.com",
-       "level": 10,
-       "more_nesting":
-        {"nickname": "mspwn", "gender": "male", "email": "msp@domain.com",
-         "level": 10}}, "level": 10}
+    {"nickname": "mspwn",
+      "gender": "male",
+      "email": "msp@domain.com",
+      "other":
+       {"nickname": "mspwn",
+         "gender": "male",
+         "email": "msp@domain.com",
+         "level": 10,
+         "more_nesting":
+          {"nickname": "mspwn",
+            "gender": "male",
+            "email": "msp@domain.com",
+            "level": 10}},
+      "level": 10}
     |}]
 ;;
