@@ -581,4 +581,65 @@ module String : sig
   (** [maximal_length l] ensure that the length of the given string is
       [<= l]. *)
   val maximal_length : int -> (string, string) fn
+
+  (** [has_prefix prefix] ensure that the given string starts with the
+      given [prefix]. *)
+  val has_prefix : string -> (string, string) fn
+
+  (** [has_suffix suffix] ensure that the given string ends with the
+      given [suffix]. *)
+  val has_suffix : string -> (string, string) fn
+end
+
+module Char : sig
+  (** Validators for chars. *)
+
+  (** {!val:equal} for [char]. *)
+  val equal : char -> (char, char) fn
+
+  (** {!val:not_equal} for [char]. *)
+  val not_equal : char -> (char, char) fn
+
+  (** {!val:one_of} for [char]. *)
+  val one_of : char list -> (char, char) fn
+
+  (** {!val:where} for [char]. *)
+  val where : ?message:string -> (char -> bool) -> (char, char) fn
+
+  (** {!val:where_opt} for [char]. *)
+  val where_opt : ?message:string -> (char -> 'b option) -> (char, 'b) fn
+
+  (** Ensure that the given char is a digit ([0..9]). *)
+  val is_digit : (char, char) fn
+
+  (** Ensure that the given char is a digit ([0..9]) and convert-it. *)
+  val as_digit : (char, int) fn
+
+  (** Ensure that the given char is an hexadecimal digit
+      ([0..9 | a..f | A..F]). *)
+  val is_hex_digit : (char, char) fn
+
+  (** Ensure that the given char is an hexadecimal digit
+      ([0..9 | a..f | A..F]) and convert-it. *)
+  val as_hex_digit : (char, int) fn
+
+  (** Ensure that the given char is an alpha char
+      ([a..z | A..Z]). *)
+  val is_alpha : (char, char) fn
+
+  (** Ensure that the given char is an alphanumeric char
+      ([0..9 | a..z | A..Z]). *)
+  val is_alphanumeric : (char, char) fn
+
+  (** Ensure that the given char is a lowercase char ([a..z]). *)
+  val is_lowercase : (char, char) fn
+
+  (** Ensure that the given char is an uppercase char ([A..Z]). *)
+  val is_uppercase : (char, char) fn
+
+  (** Ensure that the given char is a whitespace char. *)
+  val is_whitespace : (char, char) fn
+
+  (** Ensure that the given char is a newline char. *)
+  val is_newline : (char, char) fn
 end

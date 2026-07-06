@@ -703,4 +703,125 @@ module String = struct
     and max = Stdlib.max min max in
     minimal_length min & maximal_length max
   ;;
+
+  let has_prefix prefix x =
+    if Stdlib.String.starts_with ~prefix x
+    then Ok x
+    else
+      fail_with
+        ~value:(Repr.string x)
+        ("`" ^ x ^ "` does not have the prefix `" ^ prefix ^ "`")
+  ;;
+
+  let has_suffix suffix x =
+    if Stdlib.String.ends_with ~suffix x
+    then Ok x
+    else
+      fail_with
+        ~value:(Repr.string x)
+        ("`" ^ x ^ "` does not have the suffix `" ^ suffix ^ "`")
+  ;;
+end
+
+module Char = struct
+  include Make_eq (struct
+      type t = char
+
+      let to_string x = Stdlib.String.make 1 x
+      let to_repr x = Repr.string (to_string x)
+      let equal = Char.equal
+    end)
+
+  let is_digit = one_of [ '0'; '1'; '2'; '3'; '4'; '5'; '6'; '7'; '8'; '9' ]
+  let as_digit = is_digit $ fun x -> Char.(code x - code '0')
+
+  let is_hex_digit =
+    one_of
+      [ '0'
+      ; '1'
+      ; '2'
+      ; '3'
+      ; '4'
+      ; '5'
+      ; '6'
+      ; '7'
+      ; '8'
+      ; '9'
+      ; 'a'
+      ; 'b'
+      ; 'c'
+      ; 'd'
+      ; 'e'
+      ; 'f'
+      ; 'A'
+      ; 'B'
+      ; 'C'
+      ; 'D'
+      ; 'E'
+      ; 'F'
+      ]
+  ;;
+
+  let as_hex_digit =
+    is_hex_digit
+    $ function
+    | '0' .. '9' as x -> Char.(code x - code '0')
+    | 'a' .. 'f' as x -> Char.(code x - code 'a') + 10
+    | 'A' .. 'F' as x -> Char.(code x - code 'A') + 10
+    | _ -> 0 (* unreachable *)
+  ;;
+
+  let is_alpha c =
+    where
+      ~message:("`" ^ Stdlib.String.make 1 c ^ "` is not a letter")
+      (function
+        | 'a' .. 'z' | 'A' .. 'Z' -> true
+        | _ -> false)
+      c
+  ;;
+
+  let is_alphanumeric c =
+    where
+      ~message:("`" ^ Stdlib.String.make 1 c ^ "` is not alphanumeric")
+      (function
+        | 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' -> true
+        | _ -> false)
+      c
+  ;;
+
+  let is_lowercase c =
+    where
+      ~message:("`" ^ Stdlib.String.make 1 c ^ "` is not lowercase")
+      (function
+        | 'a' .. 'z' -> true
+        | _ -> false)
+      c
+  ;;
+
+  let is_uppercase c =
+    where
+      ~message:("`" ^ Stdlib.String.make 1 c ^ "` is not uppercase")
+      (function
+        | 'a' .. 'z' -> true
+        | _ -> false)
+      c
+  ;;
+
+  let is_whitespace c =
+    where
+      ~message:("`" ^ Stdlib.String.make 1 c ^ "` is not a whitespace")
+      (function
+        | ' ' | '\t' | '\n' | '\011' | '\012' | '\r' -> true
+        | _ -> false)
+      c
+  ;;
+
+  let is_newline c =
+    where
+      ~message:("`" ^ Stdlib.String.make 1 c ^ "` is not a newline")
+      (function
+        | '\n' | '\r' -> true
+        | _ -> false)
+      c
+  ;;
 end

@@ -69,6 +69,7 @@ let list l = List l
 let list_of conv l = list @@ List.map conv l
 let nel l = list (Nel.to_list l)
 let nel_of conv l = list_of conv (Nel.to_list l)
+let char c = string (String.make 1 c)
 
 let record ?(normalize_keys = true) assoc =
   (* NOTE: Empty records are allowed. *)

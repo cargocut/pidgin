@@ -169,6 +169,84 @@ open struct
         expected
         computed)
   ;;
+
+  let has_prefix0 =
+    test_case "has_prefix" `Quick (fun () ->
+      let repr = Repr.string "Hello World" in
+      let expected = Ok "Hello World"
+      and computed = Check.(string & String.has_prefix "Hello") repr in
+      check
+        (Test_lib.Testable.checked string)
+        "should be equal"
+        expected
+        computed)
+  ;;
+
+  let has_prefix1 =
+    test_case "has_prefix" `Quick (fun () ->
+      let repr = Repr.string "Hello World" in
+      let expected = Ok "Hello World"
+      and computed = Check.(string & String.has_prefix "") repr in
+      check
+        (Test_lib.Testable.checked string)
+        "should be equal"
+        expected
+        computed)
+  ;;
+
+  let has_prefix2 =
+    test_case "has_prefix" `Quick (fun () ->
+      let repr = Repr.string "Hello World" in
+      let expected =
+        Check.fail_with
+          ~value:repr
+          "`Hello World` does not have the prefix `Mh`"
+      and computed = Check.(string & String.has_prefix "Mh") repr in
+      check
+        (Test_lib.Testable.checked string)
+        "should be equal"
+        expected
+        computed)
+  ;;
+
+  let has_suffix0 =
+    test_case "has_suffix" `Quick (fun () ->
+      let repr = Repr.string "Hello World" in
+      let expected = Ok "Hello World"
+      and computed = Check.(string & String.has_suffix "World") repr in
+      check
+        (Test_lib.Testable.checked string)
+        "should be equal"
+        expected
+        computed)
+  ;;
+
+  let has_suffix1 =
+    test_case "has_suffix" `Quick (fun () ->
+      let repr = Repr.string "Hello World" in
+      let expected = Ok "Hello World"
+      and computed = Check.(string & String.has_suffix "") repr in
+      check
+        (Test_lib.Testable.checked string)
+        "should be equal"
+        expected
+        computed)
+  ;;
+
+  let has_suffix2 =
+    test_case "has_suffix" `Quick (fun () ->
+      let repr = Repr.string "Hello World" in
+      let expected =
+        Check.fail_with
+          ~value:repr
+          "`Hello World` does not have the suffix `Mh`"
+      and computed = Check.(string & String.has_suffix "Mh") repr in
+      check
+        (Test_lib.Testable.checked string)
+        "should be equal"
+        expected
+        computed)
+  ;;
 end
 
 let cases =
@@ -185,5 +263,11 @@ let cases =
     ; length_between2
     ; length_between3
     ; length_between4
+    ; has_prefix0
+    ; has_prefix1
+    ; has_prefix2
+    ; has_suffix0
+    ; has_suffix1
+    ; has_suffix2
     ] )
 ;;

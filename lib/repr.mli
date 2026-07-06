@@ -72,6 +72,9 @@ val float : float conv
 (** [string] converter. *)
 val string : string conv
 
+(** [char] converter *)
+val char : char conv
+
 (** [list] converter. *)
 val list : t list conv
 
