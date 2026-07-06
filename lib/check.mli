@@ -275,6 +275,16 @@ val req
   -> 'a t
   -> 'a record
 
+(** [guard ?normalize_keys ?alt fields field check] perform [check] as
+    a conditon. *)
+val guard
+  :  ?normalize_keys:bool
+  -> ?alt:string list
+  -> (string * Repr.t) list
+  -> string
+  -> 'a t
+  -> unit record
+
 (** [use_record fields record_check] allows you to use a record
     validator in a validation pipeline for another record (enables
     reusability in record validators). *)
@@ -343,3 +353,167 @@ module Syntax : sig
 end
 
 include module type of Syntax
+
+(** {1 Validators for OCaml types}
+
+    A set of validators for well-known OCaml types. *)
+
+module Int : sig
+  (** Validators for integers. *)
+
+  (** [is_positive] ensure that the given int is positive. *)
+  val is_positive : (int, int) fn
+
+  (** [is_negative] ensure that the given int is negative. *)
+  val is_negative : (int, int) fn
+
+  (** [is_odd] ensure that the given int is odd. *)
+  val is_odd : (int, int) fn
+
+  (** [is_even] ensure that the given int is even. *)
+  val is_even : (int, int) fn
+
+  (** {!val:equal} for [int]. *)
+  val equal : int -> (int, int) fn
+
+  (** {!val:not_equal} for [int]. *)
+  val not_equal : int -> (int, int) fn
+
+  (** {!val:one_of} for [int]. *)
+  val one_of : int list -> (int, int) fn
+
+  (** {!val:gt} for [int]. *)
+  val gt : int -> (int, int) fn
+
+  (** {!val:ge} for [int]. *)
+  val ge : int -> (int, int) fn
+
+  (** {!val:lt} for [int]. *)
+  val lt : int -> (int, int) fn
+
+  (** {!val:le} for [int]. *)
+  val le : int -> (int, int) fn
+
+  (** {!val:contains} for [int]. *)
+  val contains : min:int -> max:int -> (int, int) fn
+end
+
+module Int32 : sig
+  (** Validators for int32. *)
+
+  (** [is_positive] ensure that the given int is positive. *)
+  val is_positive : (int32, int32) fn
+
+  (** [is_negative] ensure that the given int is negative. *)
+  val is_negative : (int32, int32) fn
+
+  (** [is_odd] ensure that the given int is odd. *)
+  val is_odd : (int32, int32) fn
+
+  (** [is_even] ensure that the given int is even. *)
+  val is_even : (int32, int32) fn
+
+  (** {!val:equal} for [int32]. *)
+  val equal : int32 -> (int32, int32) fn
+
+  (** {!val:not_equal} for [int32]. *)
+  val not_equal : int32 -> (int32, int32) fn
+
+  (** {!val:one_of} for [int32]. *)
+  val one_of : int32 list -> (int32, int32) fn
+
+  (** {!val:gt} for [int32]. *)
+  val gt : int32 -> (int32, int32) fn
+
+  (** {!val:ge} for [int32]. *)
+  val ge : int32 -> (int32, int32) fn
+
+  (** {!val:lt} for [int32]. *)
+  val lt : int32 -> (int32, int32) fn
+
+  (** {!val:le} for [int32]. *)
+  val le : int32 -> (int32, int32) fn
+
+  (** {!val:contains} for [int32]. *)
+  val contains : min:int32 -> max:int32 -> (int32, int32) fn
+end
+
+module Int64 : sig
+  (** Validators for int64. *)
+
+  (** [is_positive] ensure that the given int is positive. *)
+  val is_positive : (int64, int64) fn
+
+  (** [is_negative] ensure that the given int is negative. *)
+  val is_negative : (int64, int64) fn
+
+  (** [is_odd] ensure that the given int is odd. *)
+  val is_odd : (int64, int64) fn
+
+  (** [is_even] ensure that the given int is even. *)
+  val is_even : (int64, int64) fn
+
+  (** {!val:equal} for [int64]. *)
+  val equal : int64 -> (int64, int64) fn
+
+  (** {!val:not_equal} for [int64]. *)
+  val not_equal : int64 -> (int64, int64) fn
+
+  (** {!val:one_of} for [int64]. *)
+  val one_of : int64 list -> (int64, int64) fn
+
+  (** {!val:gt} for [int64]. *)
+  val gt : int64 -> (int64, int64) fn
+
+  (** {!val:ge} for [int64]. *)
+  val ge : int64 -> (int64, int64) fn
+
+  (** {!val:lt} for [int64]. *)
+  val lt : int64 -> (int64, int64) fn
+
+  (** {!val:le} for [int64]. *)
+  val le : int64 -> (int64, int64) fn
+
+  (** {!val:contains} for [int64]. *)
+  val contains : min:int64 -> max:int64 -> (int64, int64) fn
+end
+
+module Float : sig
+  (** Validators for floats. *)
+
+  (** [is_positive] ensure that the given float is positive. *)
+  val is_positive : (float, float) fn
+
+  (** [is_negative] ensure that the given float is negative. *)
+  val is_negative : (float, float) fn
+
+  (** [is_odd] ensure that the given float is odd. *)
+  val is_odd : (float, float) fn
+
+  (** [is_even] ensure that the given float is even. *)
+  val is_even : (float, float) fn
+
+  (** {!val:equal} for [float]. *)
+  val equal : float -> (float, float) fn
+
+  (** {!val:not_equal} for [float]. *)
+  val not_equal : float -> (float, float) fn
+
+  (** {!val:one_of} for [float]. *)
+  val one_of : float list -> (float, float) fn
+
+  (** {!val:gt} for [float]. *)
+  val gt : float -> (float, float) fn
+
+  (** {!val:ge} for [float]. *)
+  val ge : float -> (float, float) fn
+
+  (** {!val:lt} for [float]. *)
+  val lt : float -> (float, float) fn
+
+  (** {!val:le} for [float]. *)
+  val le : float -> (float, float) fn
+
+  (** {!val:contains} for [float]. *)
+  val contains : min:float -> max:float -> (float, float) fn
+end

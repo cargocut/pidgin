@@ -242,6 +242,10 @@ let req ?(normalize_keys = true) ?(alt = []) fields key v =
   aux (key :: alt)
 ;;
 
+let guard ?normalize_keys ?alt fields key v =
+  req ?normalize_keys ?alt fields key (v & const ())
+;;
+
 let use_record fields v =
   Repr.record fields |> v |> Result.map_error invalid_subrecord
 ;;
@@ -504,3 +508,112 @@ let contains ?to_repr ?to_string ?(cmp = Stdlib.compare) ~min ~max x =
     in
     fail_with ?value message)
 ;;
+
+module type NUM = sig
+  type t
+
+  val to_repr : t Repr.conv
+  val to_string : t -> string
+  val equal : t -> t -> bool
+  val compare : t -> t -> int
+  val zero : t
+  val one : t
+  val two : t
+  val rem : t -> t -> t
+end
+
+module Make_num (N : NUM) = struct
+  let equal = equal ~to_repr:N.to_repr ~to_string:N.to_string ~eq:N.equal
+
+  let not_equal =
+    not_equal ~to_repr:N.to_repr ~to_string:N.to_string ~eq:N.equal
+  ;;
+
+  let one_of = one_of ~to_repr:N.to_repr ~to_string:N.to_string ~eq:N.equal
+  let gt = gt ~to_repr:N.to_repr ~to_string:N.to_string ~cmp:N.compare
+  let ge = ge ~to_repr:N.to_repr ~to_string:N.to_string ~cmp:N.compare
+  let lt = lt ~to_repr:N.to_repr ~to_string:N.to_string ~cmp:N.compare
+  let le = le ~to_repr:N.to_repr ~to_string:N.to_string ~cmp:N.compare
+
+  let contains =
+    contains ~to_repr:N.to_repr ~to_string:N.to_string ~cmp:N.compare
+  ;;
+
+  let is_positive x =
+    if N.compare x N.zero >= 0
+    then Ok x
+    else
+      fail_with ~value:(N.to_repr x) ("`" ^ N.to_string x ^ "` is not positive")
+  ;;
+
+  let is_negative x =
+    if N.compare x N.zero < 0
+    then Ok x
+    else
+      fail_with ~value:(N.to_repr x) ("`" ^ N.to_string x ^ "` is not negative")
+  ;;
+
+  let is_odd x =
+    if N.equal (N.rem x N.two) N.one
+    then Ok x
+    else fail_with ~value:(N.to_repr x) ("`" ^ N.to_string x ^ "` is not odd")
+  ;;
+
+  let is_even x =
+    if N.equal (N.rem x N.two) N.zero
+    then Ok x
+    else fail_with ~value:(N.to_repr x) ("`" ^ N.to_string x ^ "` is not even")
+  ;;
+end
+
+module Int = Make_num (struct
+    type t = int
+
+    let to_repr = Repr.int
+    let to_string = string_of_int
+    let equal = Stdlib.Int.equal
+    let compare = Stdlib.Int.compare
+    let zero = 0
+    let one = 1
+    let two = 2
+    let rem a b = a mod b
+  end)
+
+module Int32 = Make_num (struct
+    type t = int32
+
+    let to_repr = Repr.int32
+    let to_string = Int32.to_string
+    let equal = Int32.equal
+    let compare = Int32.compare
+    let zero = 0l
+    let one = 1l
+    let two = 2l
+    let rem a b = Int32.rem a b
+  end)
+
+module Int64 = Make_num (struct
+    type t = int64
+
+    let to_repr = Repr.int64
+    let to_string = Int64.to_string
+    let equal = Int64.equal
+    let compare = Int64.compare
+    let zero = 0L
+    let one = 1L
+    let two = 2L
+    let rem a b = Int64.rem a b
+  end)
+
+module Float = Make_num (struct
+    type t = float
+
+    let to_repr = Repr.float
+    let to_string = Stdlib.string_of_float
+    let equal = Float.equal
+    let compare = Float.compare
+    let zero = 0.0
+    let one = 1.0
+    let two = 2.0
+    let rem a b = Float.rem a b
+  end)
