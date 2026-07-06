@@ -148,6 +148,10 @@ val from : (module CHECKABLE with type t = 'a) -> 'a t
     [p x = false]. *)
 val where : ?value:Repr.t -> ?message:string -> ('a -> bool) -> ('a, 'a) fn
 
+(** [unless ?message p] validate using [p] and raise [message] if
+    [p x = true]. *)
+val unless : ?value:Repr.t -> ?message:string -> ('a -> bool) -> ('a, 'a) fn
+
 (** [where_opt ?message p] validate using [p] and raise [message] if
     [p x = None]. *)
 val where_opt
@@ -155,6 +159,86 @@ val where_opt
   -> ?message:string
   -> ('a -> 'b option)
   -> ('a, 'b) fn
+
+(** {2 Generic validators}
+
+    Describes a set of generic validators (configured using comparison
+    functions) that are specialized in submodules.
+
+    Typically, functions take other functions as arguments to convert
+    representations, [to_string] functions, and generic functions such
+    as `[equal]`. They can be specialized on demand. *)
+
+(** [equal ?to_repr ?to_string ?eq a] is a validator that ensure that
+    the given value is equal (using [eq]) to [a]. If [eq] is not
+    provided, it use the [(=)]. *)
+val equal
+  :  ?to_repr:'a Repr.conv
+  -> ?to_string:('a -> string)
+  -> ?eq:('a -> 'a -> bool)
+  -> 'a
+  -> ('a, 'a) fn
+
+(** [not_equal ?to_repr ?to_string ?eq a] is a validator that ensure that
+    the given value is not equal (using [eq]) to [a]. If [eq] is not
+    provided, it use the [(=)]. *)
+val not_equal
+  :  ?to_repr:'a Repr.conv
+  -> ?to_string:('a -> string)
+  -> ?eq:('a -> 'a -> bool)
+  -> 'a
+  -> ('a, 'a) fn
+
+(** [gt ?to_repr ?to_string ?cmp a] is a validator that ensure that
+    the given value is greater (using [cmp]) than [a]. If [cmp] is not
+    provided, it use the [Stdlib.compare]. *)
+val gt
+  :  ?to_repr:'a Repr.conv
+  -> ?to_string:('a -> string)
+  -> ?cmp:('a -> 'a -> int)
+  -> 'a
+  -> ('a, 'a) fn
+
+(** [ge ?to_repr ?to_string ?cmp a] is a validator that ensure that
+    the given value is greater or equal  (using [cmp]) than [a]. If [cmp] is not
+    provided, it use the [Stdlib.compare]. *)
+val ge
+  :  ?to_repr:'a Repr.conv
+  -> ?to_string:('a -> string)
+  -> ?cmp:('a -> 'a -> int)
+  -> 'a
+  -> ('a, 'a) fn
+
+(** [lt ?to_repr ?to_string ?cmp a] is a validator that ensure that
+    the given value is lower (using [cmp]) than [a]. If [cmp] is not
+    provided, it use the [Stdlib.compare]. *)
+val lt
+  :  ?to_repr:'a Repr.conv
+  -> ?to_string:('a -> string)
+  -> ?cmp:('a -> 'a -> int)
+  -> 'a
+  -> ('a, 'a) fn
+
+(** [le ?to_repr ?to_string ?cmp a] is a validator that ensure that
+    the given value is lower or equal (using [cmp]) than [a]. If [cmp] is not
+    provided, it use the [Stdlib.compare]. *)
+val le
+  :  ?to_repr:'a Repr.conv
+  -> ?to_string:('a -> string)
+  -> ?cmp:('a -> 'a -> int)
+  -> 'a
+  -> ('a, 'a) fn
+
+(** [contains ?to_repr ?to_string ?cmp ~min ~max] is a validator that
+    ensure that the given value is contains into the the range
+    [[min; max]]. *)
+val contains
+  :  ?to_repr:'a Repr.conv
+  -> ?to_string:('a -> string)
+  -> ?cmp:('a -> 'a -> int)
+  -> min:'a
+  -> max:'a
+  -> ('a, 'a) fn
 
 (** {1 Dealing with Records} *)
 

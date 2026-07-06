@@ -6,19 +6,6 @@
 (** A set of pretty-printers to handle the different types defined in
     the Pidgin library. *)
 
-(** {1 Internal}
-
-    Pretty-printers, primarily for inspection, that describe Pidgin's
-    internal elements. *)
-
-(** Pretty-printer for {!type:Pidgin.Repr.t}. Uses a representation
-    similar to JSON. *)
-val repr : Format.formatter -> Pidgin.Repr.t -> unit
-
-(** Pretty-printer for {!type:Pidgin.Kind.t}. Try to make the Kinds
-    readable.. *)
-val kind : Format.formatter -> Pidgin.Kind.t -> unit
-
 (** {1 S-Expression}
 
     Pretty-printers for printing S-Expressions and canonical
@@ -33,3 +20,16 @@ val sexp : Format.formatter -> Pidgin.Sexp.t -> unit
     the canonical nature of a canonical S-expression. See
     {!val:Pidgin.Csexp.to_string}. *)
 val csexp : Format.formatter -> Pidgin.Csexp.t -> unit
+
+(** {1 Internal}
+
+    Pretty-printers, primarily for inspection, that describe Pidgin's
+    internal elements. *)
+
+(** Pretty-printer for {!type:Pidgin.Repr.t}. Uses a representation
+    similar to JSON. *)
+val repr : Format.formatter -> Pidgin.Repr.t -> unit
+
+(** Pretty-printer for {!type:Pidgin.Kind.t}. Try to make the Kinds
+    readable.. *)
+val kind : Format.formatter -> Pidgin.Kind.t -> unit

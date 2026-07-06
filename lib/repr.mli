@@ -148,6 +148,11 @@ val replace : 'b -> 'b conv -> 'a conv
 (** Equality between terms. *)
 val equal : t -> t -> bool
 
+(** {1 Misc} *)
+
+(** Convert a Repr to a string. *)
+val to_string : t -> string
+
 (** {1 Case analysis using folds}
 
     Enables case analysis by using folds (catamorphisms) to

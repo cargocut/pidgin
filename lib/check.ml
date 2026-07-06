@@ -307,6 +307,10 @@ let where ?value ?(message = "Predicate not satisfied") predicate x =
   if predicate x then Ok x else fail_with ?value message
 ;;
 
+let unless ?value ?(message = "Predicate satisfied") predicate x =
+  if not (predicate x) then Ok x else fail_with ?value message
+;;
+
 let where_opt ?value ?(message = "Predicate not satisfied") predicate x =
   match predicate x with
   | Some x -> Ok x
@@ -365,4 +369,119 @@ let char = function
     (try Ok (Char.chr i) with
      | _ -> fail_with ~value:repr "char expected")
   | repr -> fail_with ~value:repr "char expected"
+;;
+
+let make_to_string to_repr to_string =
+  match to_string, to_repr with
+  | Some ts, _ -> Some ts
+  | None, Some tr -> Some (fun x -> x |> tr |> Repr.to_string)
+  | None, None -> None
+;;
+
+let equal ?to_repr ?to_string ?(eq = Stdlib.( = )) a b =
+  if eq a b
+  then Ok b
+  else (
+    let value = Option.map (fun f -> f b) to_repr in
+    let to_string = make_to_string to_repr to_string in
+    let message =
+      match to_string with
+      | None -> "The two values are not equal"
+      | Some f -> "`" ^ f a ^ "` is not equal to `" ^ f b ^ "`"
+    in
+    fail_with ?value message)
+;;
+
+let not_equal ?to_repr ?to_string ?(eq = Stdlib.( = )) a b =
+  if not (eq a b)
+  then Ok b
+  else (
+    let value = Option.map (fun f -> f b) to_repr in
+    let to_string = make_to_string to_repr to_string in
+    let message =
+      match to_string with
+      | None -> "The two values are equal"
+      | Some f -> "`" ^ f a ^ "` is equal to `" ^ f b ^ "`"
+    in
+    fail_with ?value message)
+;;
+
+let gt ?to_repr ?to_string ?(cmp = Stdlib.compare) a b =
+  if cmp b a > 0
+  then Ok b
+  else (
+    let value = Option.map (fun f -> f b) to_repr in
+    let to_string = make_to_string to_repr to_string in
+    let message =
+      match to_string with
+      | None -> "The given value is not greater than the expected value"
+      | Some f -> "`" ^ f b ^ "` is not greater than `" ^ f a ^ "`"
+    in
+    fail_with ?value message)
+;;
+
+let ge ?to_repr ?to_string ?(cmp = Stdlib.compare) a b =
+  if cmp b a >= 0
+  then Ok b
+  else (
+    let value = Option.map (fun f -> f b) to_repr in
+    let to_string = make_to_string to_repr to_string in
+    let message =
+      match to_string with
+      | None ->
+        "The given value is noit greater or equal than the expected value"
+      | Some f -> "`" ^ f b ^ "` is not greater or equal than `" ^ f a ^ "`"
+    in
+    fail_with ?value message)
+;;
+
+let lt ?to_repr ?to_string ?(cmp = Stdlib.compare) a b =
+  if cmp b a < 0
+  then Ok b
+  else (
+    let value = Option.map (fun f -> f b) to_repr in
+    let to_string = make_to_string to_repr to_string in
+    let message =
+      match to_string with
+      | None -> "The given value is not lower than the expected value"
+      | Some f -> "`" ^ f b ^ "` is not lower than `" ^ f a ^ "`"
+    in
+    fail_with ?value message)
+;;
+
+let le ?to_repr ?to_string ?(cmp = Stdlib.compare) a b =
+  if cmp b a <= 0
+  then Ok b
+  else (
+    let value = Option.map (fun f -> f b) to_repr in
+    let to_string = make_to_string to_repr to_string in
+    let message =
+      match to_string with
+      | None -> "The given value is not lower or equal than the expected value"
+      | Some f -> "`" ^ f b ^ "` is not lower or equal than `" ^ f a ^ "`"
+    in
+    fail_with ?value message)
+;;
+
+let contains ?to_repr ?to_string ?(cmp = Stdlib.compare) ~min ~max x =
+  let min = Stdlib.min min max
+  and max = Stdlib.max min max in
+  if cmp x min >= 0 && cmp x max <= 0
+  then Ok x
+  else (
+    let value = Option.map (fun f -> f x) to_repr in
+    let to_string = make_to_string to_repr to_string in
+    let message =
+      match to_string with
+      | None -> "The given value is not include in the given range"
+      | Some f ->
+        "`"
+        ^ f x
+        ^ "` is not include in the range [`"
+        ^ f min
+        ^ "`; `"
+        ^ f max
+        ^ "`]"
+    in
+    fail_with ?value message)
 ;;

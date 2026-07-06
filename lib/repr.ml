@@ -32,6 +32,23 @@ let rec equal a b =
   | Record _, _ -> false
 ;;
 
+let rec to_string = function
+  | Null -> "null"
+  | Bool true -> "true"
+  | Bool false -> "false"
+  | Int i -> string_of_int i
+  | Float f -> string_of_float f
+  | String s -> "\"" ^ s ^ "\""
+  | List xs -> "[" ^ Misc.concat_with ~sep:";" to_string xs ^ "]"
+  | Record xs ->
+    "{"
+    ^ Misc.concat_with
+        ~sep:";"
+        (fun (k, v) -> "\"" ^ k ^ "\": " ^ to_string v)
+        xs
+    ^ "}"
+;;
+
 type 'a conv = 'a -> t
 
 module type PROJECTABLE = sig
