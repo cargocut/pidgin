@@ -406,6 +406,25 @@ let not_equal ?to_repr ?to_string ?(eq = Stdlib.( = )) a b =
     fail_with ?value message)
 ;;
 
+let one_of ?to_repr ?to_string ?(eq = Stdlib.( = )) xs x =
+  match List.find_opt (eq x) xs with
+  | Some x -> Ok x
+  | None ->
+    let value = Option.map (fun f -> f x) to_repr in
+    let to_string = make_to_string to_repr to_string in
+    let message =
+      match to_string with
+      | None -> "The given value is not included in the given list"
+      | Some f ->
+        "`"
+        ^ f x
+        ^ "` is not included into `["
+        ^ Misc.concat_with ~sep:"; " f xs
+        ^ "]`"
+    in
+    fail_with ?value message
+;;
+
 let gt ?to_repr ?to_string ?(cmp = Stdlib.compare) a b =
   if cmp b a > 0
   then Ok b
@@ -473,13 +492,13 @@ let contains ?to_repr ?to_string ?(cmp = Stdlib.compare) ~min ~max x =
     let to_string = make_to_string to_repr to_string in
     let message =
       match to_string with
-      | None -> "The given value is not include in the given range"
+      | None -> "The given value is not included in the given range"
       | Some f ->
         "`"
         ^ f x
-        ^ "` is not include in the range [`"
+        ^ "` is not included in the range [`"
         ^ f min
-        ^ "`; `"
+        ^ "` .. `"
         ^ f max
         ^ "`]"
     in

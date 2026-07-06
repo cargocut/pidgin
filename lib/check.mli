@@ -189,6 +189,16 @@ val not_equal
   -> 'a
   -> ('a, 'a) fn
 
+(** [one_of ?to_repr ?to_string ?eq xs] is a validator that ensure
+    that the given value is in the list [xs] (using [eq]). If [eq] is
+    not provided, it use the [(=)]. *)
+val one_of
+  :  ?to_repr:'a Repr.conv
+  -> ?to_string:('a -> string)
+  -> ?eq:('a -> 'a -> bool)
+  -> 'a list
+  -> ('a, 'a) fn
+
 (** [gt ?to_repr ?to_string ?cmp a] is a validator that ensure that
     the given value is greater (using [cmp]) than [a]. If [cmp] is not
     provided, it use the [Stdlib.compare]. *)

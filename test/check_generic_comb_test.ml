@@ -252,6 +252,101 @@ open struct
       and computed = Check.(int & v) repr in
       check (Test_lib.Testable.checked int) "should be equal" expected computed)
   ;;
+
+  let contains0 =
+    test_case "contains0" `Quick (fun () ->
+      let repr = Repr.int 30
+      and v = Check.contains ~min:20 ~max:40 in
+      let expected = Ok 30
+      and computed = Check.(int & v) repr in
+      check (Test_lib.Testable.checked int) "should be equal" expected computed)
+  ;;
+
+  let contains1 =
+    test_case "contains1" `Quick (fun () ->
+      let repr = Repr.int 20
+      and v = Check.contains ~min:20 ~max:40 in
+      let expected = Ok 20
+      and computed = Check.(int & v) repr in
+      check (Test_lib.Testable.checked int) "should be equal" expected computed)
+  ;;
+
+  let contains2 =
+    test_case "contains2" `Quick (fun () ->
+      let repr = Repr.int 40
+      and v = Check.contains ~min:20 ~max:40 in
+      let expected = Ok 40
+      and computed = Check.(int & v) repr in
+      check (Test_lib.Testable.checked int) "should be equal" expected computed)
+  ;;
+
+  let contains3 =
+    test_case "contains2" `Quick (fun () ->
+      let repr = Repr.int 10
+      and v = Check.contains ~min:20 ~max:40 in
+      let expected =
+        Check.fail_with "The given value is not included in the given range"
+      and computed = Check.(int & v) repr in
+      check (Test_lib.Testable.checked int) "should be equal" expected computed)
+  ;;
+
+  let contains4 =
+    test_case "contains2" `Quick (fun () ->
+      let repr = Repr.int 41
+      and v = Check.contains ~to_repr:Repr.int ~min:20 ~max:40 in
+      let expected =
+        Check.fail_with
+          ~value:repr
+          "`41` is not included in the range [`20` .. `40`]"
+      and computed = Check.(int & v) repr in
+      check (Test_lib.Testable.checked int) "should be equal" expected computed)
+  ;;
+
+  let one_of0 =
+    test_case "one_of" `Quick (fun () ->
+      let repr = Repr.string "Hello World"
+      and v = Check.one_of [ "foo"; "bar"; "baz"; "Hello World" ] in
+      let expected = Ok "Hello World"
+      and computed = Check.(string & v) repr in
+      check
+        (Test_lib.Testable.checked string)
+        "should be equal"
+        expected
+        computed)
+  ;;
+
+  let one_of1 =
+    test_case "one_of" `Quick (fun () ->
+      let repr = Repr.string "baz"
+      and v =
+        Check.one_of ~to_repr:Repr.string [ "foo"; "bar"; "baz"; "Hello World" ]
+      in
+      let expected = Ok "baz"
+      and computed = Check.(string & v) repr in
+      check
+        (Test_lib.Testable.checked string)
+        "should be equal"
+        expected
+        computed)
+  ;;
+
+  let one_of2 =
+    test_case "one_of" `Quick (fun () ->
+      let repr = Repr.string "not-present"
+      and v =
+        Check.one_of ~to_repr:Repr.string [ "foo"; "bar"; "baz"; "Hello World" ]
+      in
+      let expected =
+        Check.fail_with
+          ~value:repr
+          {|`"not-present"` is not included into `["foo"; "bar"; "baz"; "Hello World"]`|}
+      and computed = Check.(string & v) repr in
+      check
+        (Test_lib.Testable.checked string)
+        "should be equal"
+        expected
+        computed)
+  ;;
 end
 
 let cases =
@@ -278,5 +373,13 @@ let cases =
     ; le1
     ; le2
     ; le3
+    ; contains0
+    ; contains1
+    ; contains2
+    ; contains3
+    ; contains4
+    ; one_of0
+    ; one_of1
+    ; one_of2
     ] )
 ;;
