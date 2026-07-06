@@ -2,5 +2,4 @@
  (name test_lib)
  (flags (:standard) -open Pidgin)
  (libraries nel pidgin alcotest)
- (package pidgin)
  (modules_without_implementation sigs))
