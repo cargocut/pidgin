@@ -25,7 +25,6 @@ depends: [
   "dune" {>= "3.21"}
   "ocaml" {>= "5.0.0"}
   "pidgin" {= version}
-  "ppx_expect" {with_test & >= "0.17.3"}
   "odoc" {with-doc}
 ]
 build: [
