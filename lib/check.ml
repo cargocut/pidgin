@@ -509,12 +509,17 @@ let contains ?to_repr ?to_string ?(cmp = Stdlib.compare) ~min ~max x =
     fail_with ?value message)
 ;;
 
-module type NUM = sig
+module type EQUATABLE = sig
   type t
 
   val to_repr : t Repr.conv
   val to_string : t -> string
   val equal : t -> t -> bool
+end
+
+module type NUM = sig
+  include EQUATABLE
+
   val compare : t -> t -> int
   val zero : t
   val one : t
@@ -522,14 +527,21 @@ module type NUM = sig
   val rem : t -> t -> t
 end
 
-module Make_num (N : NUM) = struct
-  let equal = equal ~to_repr:N.to_repr ~to_string:N.to_string ~eq:N.equal
+module Make_eq (E : EQUATABLE) = struct
+  let equal = equal ~to_repr:E.to_repr ~to_string:E.to_string ~eq:E.equal
 
   let not_equal =
-    not_equal ~to_repr:N.to_repr ~to_string:N.to_string ~eq:N.equal
+    not_equal ~to_repr:E.to_repr ~to_string:E.to_string ~eq:E.equal
   ;;
 
-  let one_of = one_of ~to_repr:N.to_repr ~to_string:N.to_string ~eq:N.equal
+  let one_of = one_of ~to_repr:E.to_repr ~to_string:E.to_string ~eq:E.equal
+  let where ?message pred x = where ~value:(E.to_repr x) ?message pred x
+  let where_opt ?message pred x = where_opt ~value:(E.to_repr x) ?message pred x
+end
+
+module Make_num (N : NUM) = struct
+  include Make_eq (N)
+
   let gt = gt ~to_repr:N.to_repr ~to_string:N.to_string ~cmp:N.compare
   let ge = ge ~to_repr:N.to_repr ~to_string:N.to_string ~cmp:N.compare
   let lt = lt ~to_repr:N.to_repr ~to_string:N.to_string ~cmp:N.compare
@@ -617,3 +629,78 @@ module Float = Make_num (struct
     let two = 2.0
     let rem a b = Float.rem a b
   end)
+
+module String = struct
+  include Make_eq (struct
+      type t = string
+
+      let to_repr = Repr.string
+      let to_string x = x
+      let equal = String.equal
+    end)
+
+  let not_empty = function
+    | "" -> fail_with ~value:(Repr.string "") "the given string is empty"
+    | xs -> Ok xs
+  ;;
+
+  let not_blank x =
+    match String.trim x with
+    | "" -> fail_with ~value:(Repr.string x) "the given string is blank"
+    | _ -> Ok x
+  ;;
+
+  let has_length n x =
+    let len = Stdlib.String.length x in
+    if Stdlib.Int.equal n len
+    then Ok x
+    else
+      fail_with
+        ~value:(Repr.string x)
+        ("`"
+         ^ x
+         ^ "` has length `"
+         ^ string_of_int len
+         ^ "` and not `"
+         ^ string_of_int n
+         ^ "`")
+  ;;
+
+  let minimal_length m x =
+    let len = Stdlib.String.length x in
+    if len >= m
+    then Ok x
+    else
+      fail_with
+        ~value:(Repr.string x)
+        ("`"
+         ^ x
+         ^ "` has length `"
+         ^ string_of_int len
+         ^ "` which is not greater or equal to `"
+         ^ string_of_int m
+         ^ "`")
+  ;;
+
+  let maximal_length m x =
+    let len = Stdlib.String.length x in
+    if len <= m
+    then Ok x
+    else
+      fail_with
+        ~value:(Repr.string x)
+        ("`"
+         ^ x
+         ^ "` has length `"
+         ^ string_of_int len
+         ^ "` which is not lower or equal to `"
+         ^ string_of_int m
+         ^ "`")
+  ;;
+
+  let length_between ~min ~max =
+    let min = Stdlib.min min max
+    and max = Stdlib.max min max in
+    minimal_length min & maximal_length max
+  ;;
+end

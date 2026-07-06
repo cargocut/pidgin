@@ -396,6 +396,12 @@ module Int : sig
 
   (** {!val:contains} for [int]. *)
   val contains : min:int -> max:int -> (int, int) fn
+
+  (** {!val:where} for [int]. *)
+  val where : ?message:string -> (int -> bool) -> (int, int) fn
+
+  (** {!val:where_opt} for [int]. *)
+  val where_opt : ?message:string -> (int -> 'b option) -> (int, 'b) fn
 end
 
 module Int32 : sig
@@ -436,6 +442,12 @@ module Int32 : sig
 
   (** {!val:contains} for [int32]. *)
   val contains : min:int32 -> max:int32 -> (int32, int32) fn
+
+  (** {!val:where} for [int32]. *)
+  val where : ?message:string -> (int32 -> bool) -> (int32, int32) fn
+
+  (** {!val:where_opt} for [int32]. *)
+  val where_opt : ?message:string -> (int32 -> 'b option) -> (int32, 'b) fn
 end
 
 module Int64 : sig
@@ -476,6 +488,12 @@ module Int64 : sig
 
   (** {!val:contains} for [int64]. *)
   val contains : min:int64 -> max:int64 -> (int64, int64) fn
+
+  (** {!val:where} for [int64]. *)
+  val where : ?message:string -> (int64 -> bool) -> (int64, int64) fn
+
+  (** {!val:where_opt} for [int64]. *)
+  val where_opt : ?message:string -> (int64 -> 'b option) -> (int64, 'b) fn
 end
 
 module Float : sig
@@ -516,4 +534,51 @@ module Float : sig
 
   (** {!val:contains} for [float]. *)
   val contains : min:float -> max:float -> (float, float) fn
+
+  (** {!val:where} for [float]. *)
+  val where : ?message:string -> (float -> bool) -> (float, float) fn
+
+  (** {!val:where_opt} for [float]. *)
+  val where_opt : ?message:string -> (float -> 'b option) -> (float, 'b) fn
+end
+
+module String : sig
+  (** Validators for strings. *)
+
+  (** {!val:equal} for [string]. *)
+  val equal : string -> (string, string) fn
+
+  (** {!val:not_equal} for [string]. *)
+  val not_equal : string -> (string, string) fn
+
+  (** {!val:one_of} for [string]. *)
+  val one_of : string list -> (string, string) fn
+
+  (** {!val:where} for [string]. *)
+  val where : ?message:string -> (string -> bool) -> (string, string) fn
+
+  (** {!val:where_opt} for [string]. *)
+  val where_opt : ?message:string -> (string -> 'b option) -> (string, 'b) fn
+
+  (** A validator that ensure that the given string is not empty. *)
+  val not_empty : (string, string) fn
+
+  (** A validator that ensure that the given string is not blank. *)
+  val not_blank : (string, string) fn
+
+  (** [has_length n] ensure that the given string has the length
+      [n]. *)
+  val has_length : int -> (string, string) fn
+
+  (** [length_between ~min ~max] ensure that the length of the given
+      string is [>= min] and [<= max]. *)
+  val length_between : min:int -> max:int -> (string, string) fn
+
+  (** [minimal_length l] ensure that the length of the given string is
+      [>= l]. *)
+  val minimal_length : int -> (string, string) fn
+
+  (** [maximal_length l] ensure that the length of the given string is
+      [<= l]. *)
+  val maximal_length : int -> (string, string) fn
 end

@@ -20,6 +20,7 @@ let () =
     ; Check_numeric_gen_test.cases
     ; Check_specific_test.cases
     ; Check_generic_comb_test.cases
+    ; Check_string_test.cases
     ; Sexp_parser_test.cases
     ; Csexp_to_string_test.cases
     ; Csexp_parser_test.cases
