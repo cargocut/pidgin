@@ -75,7 +75,7 @@ val string : string conv
 (** [list] converter. *)
 val list : t list conv
 
-(** [list_of conv l] build a list of {!val:t} using [conv]. *)
+(** [list_of conv l] build a list of {!type:t} using [conv]. *)
 val list_of : 'a conv -> 'a list conv
 
 (** Build a record. If the flag [normalize_keys] is true (default value)
@@ -125,7 +125,7 @@ val int64 : int64 conv
 (** [Non empty list] converter. *)
 val nel : t Nel.t conv
 
-(** [nel_of conv l] build a non-empty-list of {!val:t} using
+(** [nel_of conv l] build a non-empty-list of {!type:t} using
     [conv]. *)
 val nel_of : 'a conv -> 'a Nel.t conv
 
