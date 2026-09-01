@@ -11,9 +11,10 @@
     to that of JSON) and to provide:
 
     - a DSL for describing arbitrary data structures in this language
-      (see {!module:Repr})
+      (see {!module:Repr}).
     - Validation functions that operate on data described using this
-      DSL (see {!module:Check})
+      DSL (see {!module:Check}).
+    - [Repr] and [Check] can be combined using {!module:Prism}.
     - A bidirectional conversion approach (see {!module:Driver}),
       imposing a cost due to the indirect nature of the generic format
       (though it is viable in many scenarios).
@@ -48,4 +49,5 @@ module Csexp = Csexp
 
 (** {1 Misc} *)
 
+module Prism = Prism
 module Misc = Misc

@@ -6,6 +6,7 @@
 module Repr = Repr
 module Kind = Kind
 module Check = Check
+module Prism = Prism
 module Driver = Driver
 module Sexp = Sexp
 module Csexp = Csexp
