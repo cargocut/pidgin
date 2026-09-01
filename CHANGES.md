@@ -1,3 +1,7 @@
+### Unreleased
+
+- Add `Pidign.Pris` for bi-directional definition (by [mspwn](https://github.com/mspwn) and [xvw](https://github.com/xvw))
+
 ### v1.0.0
 
 #### Pidgin
