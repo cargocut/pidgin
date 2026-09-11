@@ -797,7 +797,7 @@ module Char = struct
     where
       ~message:("`" ^ Stdlib.String.make 1 c ^ "` is not uppercase")
       (function
-        | 'a' .. 'z' -> true
+        | 'A' .. 'Z' -> true
         | _ -> false)
       c
   ;;
