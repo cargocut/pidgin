@@ -115,6 +115,41 @@ open struct
         expected
         computed)
   ;;
+
+  let is_odd_even1 =
+    test_case "check if a negative number is odd or even" `Quick (fun () ->
+      let repr = Repr.[ int 12; int 33; int (-2); int (-3) ] in
+      let expected =
+        ( [ Ok 12
+          ; Error
+              (Check.Unexpected_value
+                 { value = Some (Repr.int 33); message = "`33` is not even" })
+          ; Ok (-2)
+          ; Error
+              (Check.Unexpected_value
+                 { value = Some (Repr.int (-3)); message = "`-3` is not even" })
+          ]
+        , [ Error
+              (Check.Unexpected_value
+                 { value = Some (Repr.int 12); message = "`12` is not odd" })
+          ; Ok 33
+          ; Error
+              (Check.Unexpected_value
+                 { value = Some (Repr.int (-2)); message = "`-2` is not odd" })
+          ; Ok (-3)
+          ] )
+      and computed =
+        ( List.map Check.(int & Int.is_even) repr
+        , List.map Check.(int & Int.is_odd) repr )
+      in
+      check
+        (pair
+           (list @@ Test_lib.Testable.checked int)
+           (list @@ Test_lib.Testable.checked int))
+        "should be equal"
+        expected
+        computed)
+  ;;
 end
 
 let cases =
@@ -127,5 +162,6 @@ let cases =
     ; int64_from_int64
     ; int64_from_arbitary_value
     ; int64_from_lookalike_64
+    ; is_odd_even1
     ] )
 ;;
