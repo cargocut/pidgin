@@ -247,7 +247,9 @@ let guard ?normalize_keys ?alt fields key v =
 ;;
 
 let use_record fields v =
-  Repr.record fields |> v |> Result.map_error invalid_subrecord
+  Repr.record ~normalize_keys:false fields
+  |> v
+  |> Result.map_error invalid_subrecord
 ;;
 
 let rec sum constrs = function
@@ -281,7 +283,7 @@ let either ~left ~right =
 ;;
 
 let rec pair fst snd = function
-  | Repr.Record [ _; _ ] as repr ->
+  | Repr.Record _ as repr ->
     record
       (fun fields ->
          let+ a = req fields "first" ~alt:[ "fst" ] fst

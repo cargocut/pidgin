@@ -6,7 +6,7 @@
 (** [strim s] apply [trim] and [lowercase_ascii] on the given [s]. *)
 val strim : string -> string
 
-(** [find_assoc ?normalize_keys key assoc] try to find the given [key]
+(** [find_assoc ?normalize_keys assoc key] try to find the given [key]
     in the [assoc] list. If [normalize_keys] is [true] (default
     choice) it will trim and lowercase the key. *)
 val find_assoc

@@ -52,7 +52,7 @@ module Yojson = struct
     | `String s -> Repr.string s
     | `List xs -> Repr.list_of translate_to_pidgin xs
     | `Assoc xs ->
-      Repr.record (List.map (fun (k, v) -> k, translate_to_pidgin v) xs)
+      Repr.Record (List.map (fun (k, v) -> k, translate_to_pidgin v) xs)
   ;;
 end
 
@@ -91,6 +91,6 @@ module Ezjsonm = struct
     | `String s -> Repr.string s
     | `A xs -> Repr.list_of translate_to_pidgin xs
     | `O xs ->
-      Repr.record (List.map (fun (k, v) -> k, translate_to_pidgin v) xs)
+      Repr.Record (List.map (fun (k, v) -> k, translate_to_pidgin v) xs)
   ;;
 end
