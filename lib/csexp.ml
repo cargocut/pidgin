@@ -116,7 +116,7 @@ let from_seq seq =
       Result.bind
         (aux (level + 1) (pos + 1) [] xs)
         (fun (node, pos, level, xs) -> aux level pos (Sexp.node node :: acc) xs)
-    | _ -> assert false
+    | Some (c, _) -> Error (Unexpected_char (c, pos))
   in
   Result.map
     (fun (r, _, _, _) ->
