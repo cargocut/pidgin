@@ -1,3 +1,12 @@
+### Unreleased
+
+#### Pidgin
+
+- Does not force `normalize key` in pidgin translation (by [gr-im](https://github.com/gr-im))
+- Fix `Csexp` wildcard case (by [gr-im](https://github.com/gr-im))
+- Fix `Check.is_uppercase` (by [gr-im](https://github.com/gr-im))
+- Fix `Check.is_odd` for negative numbers (by [gr-im](https://github.com/gr-im))
+
 ### v1.1.0
 
 #### Pidgin

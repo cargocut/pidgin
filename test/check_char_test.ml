@@ -117,9 +117,43 @@ open struct
       and computed = Check.(char & Char.is_hex_digit) repr in
       check (Test_lib.Testable.checked char) "should be equal" expected computed)
   ;;
+
+  let check_case1 =
+    test_case "is lower case or not" `Quick (fun () ->
+      let repr =
+        Repr.(
+          List.map char [ 'a'; 'B'; 'c'; 'D'; 'e'; 'F'; 'x'; 'Y'; 'z'; 'Z' ])
+      in
+      let expected =
+        ( [ Ok 'a'; Ok 'c'; Ok 'e'; Ok 'x'; Ok 'z' ]
+        , [ Ok 'B'; Ok 'D'; Ok 'F'; Ok 'Y'; Ok 'Z' ] )
+      and computed =
+        ( List.map Check.(char & Char.is_lowercase) repr
+          |> List.filter (function
+            | Ok _ -> true
+            | _ -> false)
+        , List.map Check.(char & Char.is_uppercase) repr
+          |> List.filter (function
+            | Ok _ -> true
+            | _ -> false) )
+      in
+      check
+        (pair
+           (list @@ Test_lib.Testable.checked char)
+           (list @@ Test_lib.Testable.checked char))
+        "should be equal"
+        expected
+        computed)
+  ;;
 end
 
 let cases =
   ( "Check (Char)"
-  , [ is_digit0; is_digit1; is_digit2; is_hex_digit0; is_hex_digit1 ] )
+  , [ is_digit0
+    ; is_digit1
+    ; is_digit2
+    ; is_hex_digit0
+    ; is_hex_digit1
+    ; check_case1
+    ] )
 ;;

@@ -106,7 +106,7 @@ module S = Stdlib.Set.Make (struct
     let compare = compare
   end)
 
-let uniq x = x |> S.of_list |> S.to_list
+let uniq x = x |> S.of_list |> S.elements
 
 let or_ a b =
   (* NOTE: we try to keep the smallest shape. i,e: or a a = a. *)

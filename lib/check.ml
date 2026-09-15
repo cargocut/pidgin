@@ -247,7 +247,9 @@ let guard ?normalize_keys ?alt fields key v =
 ;;
 
 let use_record fields v =
-  Repr.record fields |> v |> Result.map_error invalid_subrecord
+  Repr.record ~normalize_keys:false fields
+  |> v
+  |> Result.map_error invalid_subrecord
 ;;
 
 let rec sum constrs = function
@@ -281,7 +283,7 @@ let either ~left ~right =
 ;;
 
 let rec pair fst snd = function
-  | Repr.Record [ _; _ ] as repr ->
+  | Repr.Record _ as repr ->
     record
       (fun fields ->
          let+ a = req fields "first" ~alt:[ "fst" ] fst
@@ -522,7 +524,6 @@ module type NUM = sig
 
   val compare : t -> t -> int
   val zero : t
-  val one : t
   val two : t
   val rem : t -> t -> t
 end
@@ -566,7 +567,7 @@ module Make_num (N : NUM) = struct
   ;;
 
   let is_odd x =
-    if N.equal (N.rem x N.two) N.one
+    if not (N.equal (N.rem x N.two) N.zero)
     then Ok x
     else fail_with ~value:(N.to_repr x) ("`" ^ N.to_string x ^ "` is not odd")
   ;;
@@ -586,7 +587,6 @@ module Int = Make_num (struct
     let equal = Stdlib.Int.equal
     let compare = Stdlib.Int.compare
     let zero = 0
-    let one = 1
     let two = 2
     let rem a b = a mod b
   end)
@@ -599,7 +599,6 @@ module Int32 = Make_num (struct
     let equal = Int32.equal
     let compare = Int32.compare
     let zero = 0l
-    let one = 1l
     let two = 2l
     let rem a b = Int32.rem a b
   end)
@@ -612,7 +611,6 @@ module Int64 = Make_num (struct
     let equal = Int64.equal
     let compare = Int64.compare
     let zero = 0L
-    let one = 1L
     let two = 2L
     let rem a b = Int64.rem a b
   end)
@@ -625,7 +623,6 @@ module Float = Make_num (struct
     let equal = Float.equal
     let compare = Float.compare
     let zero = 0.0
-    let one = 1.0
     let two = 2.0
     let rem a b = Float.rem a b
   end)
@@ -802,7 +799,7 @@ module Char = struct
     where
       ~message:("`" ^ Stdlib.String.make 1 c ^ "` is not uppercase")
       (function
-        | 'a' .. 'z' -> true
+        | 'A' .. 'Z' -> true
         | _ -> false)
       c
   ;;
