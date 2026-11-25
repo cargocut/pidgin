@@ -68,3 +68,64 @@ and sexp_list ppf = function
 ;;
 
 let csexp ppf sexp = Format.pp_print_string ppf (Csexp.to_string sexp)
+let p_string pp value = Conv.string (Format.asprintf "%a" pp value)
+
+let rec value_error_to_repr = function
+  | Check.Unexpected_value { value; message } ->
+    let repr =
+      let open Conv in
+      record [ "value", option Fun.id value; "message", string message ]
+    in
+    "Unexpected_value", repr
+  | Check.Unexpected_kind { expected; given; value } ->
+    let repr =
+      let open Conv in
+      record
+        [ "expected", p_string kind expected
+        ; "given", p_string kind given
+        ; "value", value
+        ]
+    in
+    "Unexpected_kind", repr
+  | Check.Invalid_list { errors; value } ->
+    let repr =
+      let open Conv in
+      record
+        [ ( "errors"
+          , nel_of
+              (fun (i, err) -> list [ int i; snd (value_error_to_repr err) ])
+              errors )
+        ; "value", value
+        ]
+    in
+    "Invalid_list", repr
+  | Check.Invalid_record { errors; value } ->
+    let repr =
+      let open Conv in
+      record [ "errors", nel_of record_error_to_repr errors; "value", value ]
+    in
+    "Invalid_record", repr
+
+and record_error_to_repr = function
+  | Check.Invalid_subrecord error ->
+    let open Conv in
+    record
+      [ "kind", string "invalid subrecord"
+      ; "error", snd (value_error_to_repr error)
+      ]
+  | Check.Missing_field fields ->
+    let open Conv in
+    record [ "kind", string "missing field"; "field", nel_of string fields ]
+  | Check.Invalid_field { field; error } ->
+    let open Conv in
+    record
+      [ "kind", string "invalid field"
+      ; "field", nel_of string field
+      ; "error", snd (value_error_to_repr error)
+      ]
+;;
+
+let value_error ppf err =
+  let s, r = value_error_to_repr err in
+  Format.fprintf ppf "%s @[%a@]" s repr r
+;;
