@@ -41,6 +41,8 @@ module type CHECKABLE = sig
   val from_pidgin : (Repr.t, t) fn
 end
 
+module type S = CHECKABLE
+
 let from (type a) (module C : CHECKABLE with type t = a) repr =
   C.from_pidgin repr
 ;;

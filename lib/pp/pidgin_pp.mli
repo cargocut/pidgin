@@ -33,3 +33,7 @@ val repr : Format.formatter -> Pidgin.Repr.t -> unit
 (** Pretty-printer for {!type:Pidgin.Kind.t}. Try to make the Kinds
     readable.. *)
 val kind : Format.formatter -> Pidgin.Kind.t -> unit
+
+(** Pretty-printer for {!type:Pidgin.Check.value_error}. Mostly useful for unit-tests.
+*)
+val value_error : Format.formatter -> Pidgin.Check.value_error -> unit

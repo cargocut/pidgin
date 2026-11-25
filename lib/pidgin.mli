@@ -30,6 +30,10 @@
 module Repr = Repr
 module Kind = Kind
 
+(** {1 Data Conversion} *)
+
+module Conv = Conv
+
 (** {1 Data Validation} *)
 
 module Check = Check
@@ -51,3 +55,9 @@ module Csexp = Csexp
 
 module Prism = Prism
 module Misc = Misc
+
+(** {1 Reusable signatures} *)
+
+module type CONV = Conv.S
+module type CHECK = Check.S
+module type CODEC = Prism.S
