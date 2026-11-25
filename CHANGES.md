@@ -4,6 +4,11 @@
 
 - Expose `Pidgin.Conv` to enforce the symmetry between `Check` and `Conv` (by [xvw](https://github.com/xvw))
 
+#### Pidgin_pp
+
+- Add `Pidgin_pp.value_error`, for unit-test purpose (by [xvw](https://github.com/xvw))
+
+
 ### v1.2.0
 
 #### Pidgin
