@@ -63,6 +63,8 @@ type ('a, 'b) fn = 'a -> 'b value
     from a {!type:Repr.t}. *)
 type 'a t = (Repr.t, 'a) fn
 
+(** {1 Signatures} *)
+
 module type CHECKABLE = sig
   (** Describes a module whose values of type {!type:t} can be
       checked from a Pidgin representation ({!type:Repr.t}) *)
@@ -73,6 +75,8 @@ module type CHECKABLE = sig
   (** [from_pidgin repr] check [repr] into [t]. *)
   val from_pidgin : (Repr.t, t) fn
 end
+
+module type S = CHECKABLE
 
 (** {1 Data Validation} *)
 
@@ -173,7 +177,7 @@ val where_opt
     the given value is equal (using [eq]) to [a]. If [eq] is not
     provided, it use the [(=)]. *)
 val equal
-  :  ?to_repr:'a Repr.conv
+  :  ?to_repr:'a Conv.t
   -> ?to_string:('a -> string)
   -> ?eq:('a -> 'a -> bool)
   -> 'a
@@ -183,7 +187,7 @@ val equal
     the given value is not equal (using [eq]) to [a]. If [eq] is not
     provided, it use the [(=)]. *)
 val not_equal
-  :  ?to_repr:'a Repr.conv
+  :  ?to_repr:'a Conv.t
   -> ?to_string:('a -> string)
   -> ?eq:('a -> 'a -> bool)
   -> 'a
@@ -193,7 +197,7 @@ val not_equal
     that the given value is in the list [xs] (using [eq]). If [eq] is
     not provided, it use the [(=)]. *)
 val one_of
-  :  ?to_repr:'a Repr.conv
+  :  ?to_repr:'a Conv.t
   -> ?to_string:('a -> string)
   -> ?eq:('a -> 'a -> bool)
   -> 'a list
@@ -203,7 +207,7 @@ val one_of
     the given value is greater (using [cmp]) than [a]. If [cmp] is not
     provided, it use the [Stdlib.compare]. *)
 val gt
-  :  ?to_repr:'a Repr.conv
+  :  ?to_repr:'a Conv.t
   -> ?to_string:('a -> string)
   -> ?cmp:('a -> 'a -> int)
   -> 'a
@@ -213,7 +217,7 @@ val gt
     the given value is greater or equal  (using [cmp]) than [a]. If [cmp] is not
     provided, it use the [Stdlib.compare]. *)
 val ge
-  :  ?to_repr:'a Repr.conv
+  :  ?to_repr:'a Conv.t
   -> ?to_string:('a -> string)
   -> ?cmp:('a -> 'a -> int)
   -> 'a
@@ -223,7 +227,7 @@ val ge
     the given value is lower (using [cmp]) than [a]. If [cmp] is not
     provided, it use the [Stdlib.compare]. *)
 val lt
-  :  ?to_repr:'a Repr.conv
+  :  ?to_repr:'a Conv.t
   -> ?to_string:('a -> string)
   -> ?cmp:('a -> 'a -> int)
   -> 'a
@@ -233,7 +237,7 @@ val lt
     the given value is lower or equal (using [cmp]) than [a]. If [cmp] is not
     provided, it use the [Stdlib.compare]. *)
 val le
-  :  ?to_repr:'a Repr.conv
+  :  ?to_repr:'a Conv.t
   -> ?to_string:('a -> string)
   -> ?cmp:('a -> 'a -> int)
   -> 'a
@@ -243,7 +247,7 @@ val le
     ensure that the given value is contains into the the range
     [[min; max]]. *)
 val contains
-  :  ?to_repr:'a Repr.conv
+  :  ?to_repr:'a Conv.t
   -> ?to_string:('a -> string)
   -> ?cmp:('a -> 'a -> int)
   -> min:'a

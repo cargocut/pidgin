@@ -4,7 +4,7 @@
    SPDX-License-Identifier: BSD-3-Clause *)
 
 type 'a t =
-  { conv : 'a Repr.conv
+  { conv : 'a Conv.t
   ; check : 'a Check.t
   }
 
@@ -23,3 +23,10 @@ let refine f g { conv; check } =
   ; conv = (fun x -> x |> g |> conv)
   }
 ;;
+
+module type S = sig
+  type t
+
+  include Conv.S with type t := t
+  include Check.S with type t := t
+end

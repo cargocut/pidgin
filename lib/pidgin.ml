@@ -6,8 +6,13 @@
 module Repr = Repr
 module Kind = Kind
 module Check = Check
+module Conv = Conv
 module Prism = Prism
 module Driver = Driver
 module Sexp = Sexp
 module Csexp = Csexp
 module Misc = Misc
+
+module type CONV = Conv.S
+module type CHECK = Check.S
+module type CODEC = Prism.S

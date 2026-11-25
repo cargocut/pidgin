@@ -41,6 +41,8 @@ type t =
     contravariant functor that can be used with {!val:using}. *)
 type 'a conv = 'a -> t
 
+(** {1 Signatures} *)
+
 module type PROJECTABLE = sig
   (** Describes a module in which {!type:t} can be projected into a
       [pidgin] representation. *)

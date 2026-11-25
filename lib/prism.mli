@@ -4,7 +4,7 @@
    SPDX-License-Identifier: BSD-3-Clause *)
 
 (** A [Prism] is used to describe a codec that enables serialization
-    and deserialization (it consists of a {!type:Repr.conv} and a
+    and deserialization (it consists of a {!type:Conv.t} and a
     {!type:Check.t} pair). *)
 
 (** {1 Types} *)
@@ -12,15 +12,27 @@
 (** The type that describes the pair of converter and validator. *)
 type 'a t
 
+(** {1 Signatures} *)
+
+module type S = sig
+  (** Describes a module whose can be validated and projected. *)
+
+  (** The type that can be checked and projected *)
+  type t
+
+  include Conv.S with type t := t
+  include Check.S with type t := t
+end
+
 (** {1 Building prisms} *)
 
 (** [make ~conv ~check] constructs a prism for type ['a]. *)
-val make : conv:'a Repr.conv -> check:'a Check.t -> 'a t
+val make : conv:'a Conv.t -> check:'a Check.t -> 'a t
 
 (** {1 Running prisms} *)
 
 (** [conv prism] extract the prism conversion function. *)
-val conv : 'a t -> 'a Repr.conv
+val conv : 'a t -> 'a Conv.t
 
 (** [check prism] extract the prism validation function. *)
 val check : 'a t -> 'a Check.t
